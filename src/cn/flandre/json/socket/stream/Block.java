@@ -1,6 +1,7 @@
 package cn.flandre.json.socket.stream;
 
-import cn.flandre.json.socket.exception.SystemBufferOverflowException;
+import cn.flandre.json.constant.IOConstant;
+import cn.flandre.json.exception.SystemBufferOverflowException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,8 +31,16 @@ public class Block {
         return is.read(bytes, limit, bytes.length - limit);
     }
 
-    public int read(byte[] bytes, int offset, int len){
-        return 0;
+    public int read() {
+        if (pos < limit) return bytes[pos++];
+        return -1;
+    }
+
+    public int read(byte[] bytes, int offset, int len) {
+        int min = Math.min(limit - pos, len);
+        System.arraycopy(this.bytes, pos, bytes, offset, min);
+        pos += min;
+        return min;
     }
 
     public int write(OutputStream os) throws IOException {
@@ -44,6 +53,17 @@ public class Block {
         return len;
     }
 
+    public void write(int b) {
+        bytes[pos++] = (byte) b;
+    }
+
+    public int write(byte[] bytes, int off, int len){
+        int min = Math.min(len, IOConstant.BLOCK_SIZE - limit);
+        System.arraycopy(bytes, off, this.bytes, pos, min);
+        limit += min;
+        return min;
+    }
+
     public void incLimit(int r) {
         limit += r;
     }
@@ -54,5 +74,17 @@ public class Block {
 
     public boolean isEmpty() {
         return pos == limit;
+    }
+
+    public byte[] getBytes() {
+        return bytes;
+    }
+
+    public int getPos() {
+        return pos;
+    }
+
+    public int getLimit() {
+        return limit;
     }
 }

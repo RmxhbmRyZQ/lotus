@@ -11,7 +11,7 @@ public class Security implements Verification {
     }
 
     @Override
-    public boolean verify(SocketChannel sc) {
+    public boolean verify(SocketChannel sc) {  // 安全验证
         for (Verification verification : v) {
             if (!verification.verify(sc))
                 return false;

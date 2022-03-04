@@ -1,6 +1,6 @@
 package cn.flandre.json.socket.stream;
 
-import cn.flandre.json.socket.exception.SystemBufferOverflowException;
+import cn.flandre.json.exception.SystemBufferOverflowException;
 
 import java.io.IOException;
 import java.io.OutputStream;

@@ -31,7 +31,7 @@ public class Server extends AbstractSelect {
         ServerSocketChannel serverSocketChannel = (ServerSocketChannel) key.channel();
         SocketChannel sc = serverSocketChannel.accept();
         configureSocket(sc);
-        if (security.verify(sc)) {
+        if (security.verify(sc)) {  // 通过验证后，把连接扔给线程池分配
             Message obtain = Message.obtain(IOConstant.DISTRIBUTE_SOCKET, sc);
             postman.sendMessage(obtain);
         } else {

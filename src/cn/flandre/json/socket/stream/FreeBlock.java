@@ -6,7 +6,7 @@ import static cn.flandre.json.constant.IOConstant.BLOCK_SIZE;
 
 public class FreeBlock {
 
-    static private final LinkedList<Block> free = new LinkedList<>();  // 全局空闲块内存
+    private final LinkedList<Block> free = new LinkedList<>();  // 全局空闲块内存
 
     /**
      * 从全局空闲块申请一个块

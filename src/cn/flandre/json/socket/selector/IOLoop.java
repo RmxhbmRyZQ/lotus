@@ -95,7 +95,8 @@ public class IOLoop implements Register {
         }
     }
 
-    private void cancel(SelectableChannel channel) {
+    @Override
+    public void cancel(SelectableChannel channel) {
         if (channel == null || !channel.isOpen()) return;
         if (close != null) close.onClose();
         try {

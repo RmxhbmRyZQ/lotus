@@ -1,46 +1,43 @@
 package cn.flandre.json.socket.selector;
 
-import cn.flandre.json.socket.threadpool.Worker;
+import cn.flandre.json.http.resolve.HttpContext;
+import cn.flandre.json.http.resolve.HttpHeaderMatch;
+import cn.flandre.json.socket.stream.BlockInputStream;
+import cn.flandre.json.socket.stream.BlockOutputStream;
+import cn.flandre.json.socket.stream.FreeBlock;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.StandardCharsets;
 
 public class Client extends AbstractSelect {
     private final SocketChannel sc;
     private final Register register;
-    private final Worker worker;
+    private final BlockInputStream bis;
+    private final BlockOutputStream bos;
+    private final HttpContext context = new HttpContext();
 
-    public Client(SocketChannel sc, Register register, Worker worker) {
+    public Client(SocketChannel sc, Register register, FreeBlock freeBlock) {
         this.sc = sc;
         this.register = register;
-        this.worker = worker;
+        bis = new BlockInputStream(sc, freeBlock);
+        bos = new BlockOutputStream(sc, freeBlock);
+        bis.setMatch(new HttpHeaderMatch(bis, bos, register, context));
     }
 
     @Override
     public void onRead(SelectionKey key) throws IOException {
-        SocketChannel sc = (SocketChannel) key.channel();
-        ByteBuffer allocate = ByteBuffer.allocate(4096);
-        int r = 0;
-        while (sc.read(allocate) != 0) {
-            r += allocate.limit();
-            allocate.clear();
+        if (bis.readFully(key) == -1) {
+            register.cancel(sc);
         }
-        System.out.println(Thread.currentThread() + ":" + r + ":" + key.channel());
-        key.interestOps(SelectionKey.OP_WRITE | SelectionKey.OP_READ);
     }
 
     @Override
     public void onWrite(SelectionKey key) throws IOException {
-        String html = "<body><form action=\"/\" method=\"post\" enctype=\"multipart/form-data\"><input type=\"file\" name=\"upload\"><input type=\"submit\" name=\"sub\" id=\"\"></form></body>";
-        String response = "HTTP/1.1 200 OK\r\nContent-Length: " + html.length() + "\r\n\r\n" + html;
-        ByteBuffer allocate = ByteBuffer.allocate(1024);
-        allocate.put(response.getBytes(StandardCharsets.UTF_8));
-        SocketChannel sc = (SocketChannel) key.channel();
-        allocate.flip();
-        sc.write(allocate);
-        key.interestOps(SelectionKey.OP_READ);
+        if (bos.writeFully()) {
+            if (context.getRequest().getHeader("Connection").equalsIgnoreCase("keep-live"))
+                key.interestOps(SelectionKey.OP_READ);
+            else register.cancel(key.channel());
+        }
     }
 }

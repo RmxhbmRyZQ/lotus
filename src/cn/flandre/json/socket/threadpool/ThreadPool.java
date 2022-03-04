@@ -16,11 +16,11 @@ public class ThreadPool implements Postman {
     private final Worker[] workers;
 
     public ThreadPool() throws IOException {
-        int core = Runtime.getRuntime().availableProcessors();
+        int core = Runtime.getRuntime().availableProcessors();  // 系统的线程数
         workers = new Worker[core];
         taskNumber = new int[core];
         initHandler();
-        for (int i = 0; i < workers.length; i++) {
+        for (int i = 0; i < workers.length; i++) {  // 创建相应的线程
             workers[i] = new Worker(handler, i);
             freeWorker.add(workers[i]);
             workers[i].start();
@@ -30,7 +30,7 @@ public class ThreadPool implements Postman {
     private void initHandler() {
         handler = new Handler(message -> {
             switch (message.what) {
-                case IOConstant.DISTRIBUTE_SOCKET:
+                case IOConstant.DISTRIBUTE_SOCKET:  // 分配socket到合适的线程
                     distributeSocket((SocketChannel) message.obj);
                     break;
                 case IOConstant.CLOSE_SOCKET:
@@ -42,7 +42,7 @@ public class ThreadPool implements Postman {
     }
 
     private void closeSocket(int id) {
-        if (--taskNumber[id] == 0) {
+        if (--taskNumber[id] == 0) {  // 当一个线程里面没有连接时，加入空线程队列
             freeWorker.add(workers[id]);
         }
     }
@@ -63,7 +63,7 @@ public class ThreadPool implements Postman {
             worker = workers[id];
         }
         taskNumber[worker.id()]++;
-        Client client = new Client(obj, worker.getLoop(), worker);
+        Client client = new Client(obj, worker.getLoop(), worker.getFreeBlock());
         if (!worker.register(new RegisterItem(obj, SelectionKey.OP_READ, client))) {
             handler.sendMessage(Message.obtain(IOConstant.CLOSE_SOCKET, worker.id()));
         }

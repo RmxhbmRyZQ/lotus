@@ -1,4 +1,4 @@
-package cn.flandre.json.socket.exception;
+package cn.flandre.json.exception;
 
 import java.io.IOException;
 
