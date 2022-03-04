@@ -1,9 +1,8 @@
 package cn.flandre.json.socket.stream;
 
-import cn.flandre.json.http.resolve.Match;
+import cn.flandre.json.http.match.Match;
 
 import java.io.*;
-import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.LinkedList;
 
@@ -26,8 +25,8 @@ public class BlockInputStream extends InputStream {
         this.match = match;
     }
 
-    public int readFully(SelectionKey key) throws IOException {
-        if (match == null) throw new IOException("must call setMatch first");
+    public int readFully() throws IOException {
+        if (match == null) throw new IOException("Must call setMatch first");
         int len = 0, r, off;
         while (true) {
             off = buffer.getPos();
@@ -39,11 +38,11 @@ public class BlockInputStream extends InputStream {
             }
             len += r;
             buffer.incLimit(r);
+            match.match(r, buffer, off);
             if (buffer.isFull()) {  // 如果写满取空的出来
                 buffer = freeBlock.poll();
                 queue.add(buffer);
             }
-            match.match(r, buffer, off, key);
         }
         return len;
     }

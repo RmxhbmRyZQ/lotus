@@ -1,35 +1,26 @@
-package cn.flandre.json.http.resolve;
+package cn.flandre.json.http.match;
 
 import cn.flandre.json.constant.IOConstant;
 import cn.flandre.json.exception.InvalidHttpHeaderException;
-import cn.flandre.json.socket.selector.Register;
+import cn.flandre.json.http.web.Request;
+import cn.flandre.json.http.web.Response;
+import cn.flandre.json.middleware.GlobalMiddleware;
+import cn.flandre.json.middleware.Pipeline;
 import cn.flandre.json.socket.stream.Block;
-import cn.flandre.json.socket.stream.BlockInputStream;
-import cn.flandre.json.socket.stream.BlockOutputStream;
-
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.channels.SelectionKey;
-import java.nio.charset.StandardCharsets;
 
 public class HttpHeaderMatch implements Match {
-    private final BlockInputStream bis;
-    private final Register register;
     private final HttpContext context;
     private final byte[] delimiter = new byte[]{13, 10, 13, 10};  // 普配的数据
-    private final BlockOutputStream bos;
     private int len = 0;
     private int delimiterOffset = 0;
 
-    public HttpHeaderMatch(BlockInputStream bis, BlockOutputStream bos, Register register, HttpContext context) {
-        this.bis = bis;
-        this.register = register;
+    public HttpHeaderMatch(HttpContext context) {
         this.context = context;
-        this.bos = bos;
     }
 
     @Override
-    public void match(int read, Block block, int offset, SelectionKey key) throws IOException {
+    public void match(int read, Block block, int offset) {
+        HttpBodyMatch match = context.getHttpBodyMatch();
         // 要是block里面有两个HTTP头怎么办
         int index = indexOf(block.getBytes(), read, offset);
         if (index == -1) {
@@ -37,16 +28,25 @@ public class HttpHeaderMatch implements Match {
         } else {
             len += index;
             try {
-                resolveRequest(key, read - index);
+                Request request = resolveRequest();
+
+                context.setRequest(request);
+                context.setResponse(new Response());
+
+                for (Pipeline pipeline : GlobalMiddleware.in) {
+                    if (!pipeline.handle(context)) {
+                        return;
+                    }
+                }
+
+                String contentLength = request.getHeader("Content-Length");
+                match.setRequire(contentLength != null ? Integer.parseInt(contentLength) : 0);
+                match.match(read - index, block, offset + index);
+                context.getBis().setMatch(match);
             } catch (InvalidHttpHeaderException e) {
-                register.cancel(key.channel());
-                return;
+                context.getRegister().cancel(context.getKey().channel());
             }
         }
-        String html = "<body><form action=\"/\" method=\"post\" enctype=\"multipart/form-data\"><input type=\"file\" name=\"upload\"><input type=\"submit\" name=\"sub\" id=\"\"></form></body>";
-        String response = "HTTP/1.1 200 OK\r\nContent-Length: " + html.length() + "\r\n\r\n" + html;
-        bos.write(response.getBytes(StandardCharsets.UTF_8));
-        key.interestOps(SelectionKey.OP_WRITE);
     }
 
     private int indexOf(byte[] source, int r, int offset) {
@@ -91,19 +91,17 @@ public class HttpHeaderMatch implements Match {
         return -1;
     }
 
-    private void resolveRequest(SelectionKey key, int left) throws IOException {
-        InputStreamReader reader = new InputStreamReader(bis);
-        char[] chars = new char[len - 4];
-        reader.read(chars);
-        reader.skip(4);
-        String httpHeader = new String(chars);
+    private final byte[] skip = new byte[4];
+
+    private Request resolveRequest() throws InvalidHttpHeaderException {
+        byte[] bytes = new byte[len - 4];
+        context.getBis().read(bytes);
+        context.getBis().read(skip);
+        String httpHeader = new String(bytes);
 
         Request request = new Request(httpHeader);
-        System.out.print(request);
-        context.setRequest(request);
-        String contentLength = request.getHeader("Content-Length");
-
-        bis.setMatch(new HttpBodyMatch(contentLength != null ? Integer.parseInt(contentLength) : 0, left, bis, register, request));
         len = 0;
+
+        return request;
     }
 }

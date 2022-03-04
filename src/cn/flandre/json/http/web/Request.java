@@ -1,4 +1,4 @@
-package cn.flandre.json.http.resolve;
+package cn.flandre.json.http.web;
 
 import cn.flandre.json.exception.InvalidHttpHeaderException;
 
@@ -8,10 +8,11 @@ import java.util.Map;
 
 public class Request {
     private final Map<String, String> headers = new HashMap<>();
-    private final Cookie cookies;
+    private final RequestCookie cookies;
     private final RequestMethod method;
     private final String path;
     private final String protocol;
+    private byte[] content;
 
     public Request(String httpHeader) throws InvalidHttpHeaderException {
         String[] fields = httpHeader.split("\r\n");
@@ -32,11 +33,11 @@ public class Request {
             throw new InvalidHttpHeaderException();
 
         for (int i = 1; i < fields.length; i++) {
-            String[] split = fields[i].split(":");
+            String[] split = fields[i].split(":", 2);
             headers.put(split[0], split[1].trim());
         }
 
-        cookies = new Cookie(headers.get("Cookie"));
+        cookies = new RequestCookie(headers.get("Cookie"));
         headers.remove("Cookie");
     }
 
@@ -58,7 +59,7 @@ public class Request {
             builder.append("\r\n").append(entry.getKey()).append("=").append(entry.getValue());
         }
 
-        String cookie = cookies.toString("Cookie: ");
+        String cookie = cookies.toString();
         if (cookie != null) builder.append("\r\n").append(cookie);
         builder.append("\r\n\r\n");
 
@@ -83,5 +84,9 @@ public class Request {
 
     public String getProtocol() {
         return protocol;
+    }
+
+    public void setContent(byte[] content) {
+        this.content = content;
     }
 }

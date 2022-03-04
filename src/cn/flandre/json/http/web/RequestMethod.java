@@ -1,4 +1,4 @@
-package cn.flandre.json.http.resolve;
+package cn.flandre.json.http.web;
 
 public enum RequestMethod {
     GET, POST, IGNORANT_METHOD;

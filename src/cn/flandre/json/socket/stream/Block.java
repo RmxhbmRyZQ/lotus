@@ -54,12 +54,12 @@ public class Block {
     }
 
     public void write(int b) {
-        bytes[pos++] = (byte) b;
+        bytes[limit++] = (byte) b;
     }
 
     public int write(byte[] bytes, int off, int len){
         int min = Math.min(len, IOConstant.BLOCK_SIZE - limit);
-        System.arraycopy(bytes, off, this.bytes, pos, min);
+        System.arraycopy(bytes, off, this.bytes, limit, min);
         limit += min;
         return min;
     }

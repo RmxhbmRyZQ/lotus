@@ -1,7 +1,9 @@
 package cn.flandre.json.socket.selector;
 
-import cn.flandre.json.http.resolve.HttpContext;
-import cn.flandre.json.http.resolve.HttpHeaderMatch;
+import cn.flandre.json.http.match.HttpBodyMatch;
+import cn.flandre.json.http.match.HttpContext;
+import cn.flandre.json.http.match.HttpHeaderMatch;
+import cn.flandre.json.http.match.WriteFinish;
 import cn.flandre.json.socket.stream.BlockInputStream;
 import cn.flandre.json.socket.stream.BlockOutputStream;
 import cn.flandre.json.socket.stream.FreeBlock;
@@ -15,29 +17,39 @@ public class Client extends AbstractSelect {
     private final Register register;
     private final BlockInputStream bis;
     private final BlockOutputStream bos;
-    private final HttpContext context = new HttpContext();
+    private HttpContext context;
 
     public Client(SocketChannel sc, Register register, FreeBlock freeBlock) {
         this.sc = sc;
         this.register = register;
         bis = new BlockInputStream(sc, freeBlock);
         bos = new BlockOutputStream(sc, freeBlock);
-        bis.setMatch(new HttpHeaderMatch(bis, bos, register, context));
+        initMatch();
+    }
+
+    private void initMatch() {
+        context = new HttpContext(bis, bos, register);
+        HttpHeaderMatch httpHeaderMatch = new HttpHeaderMatch(context);
+        HttpBodyMatch httpBodyMatch = new HttpBodyMatch(context);
+        context.setHttpHeaderMatch(httpHeaderMatch);
+        context.setHttpBodyMatch(httpBodyMatch);
+        bis.setMatch(httpHeaderMatch);
+
+        WriteFinish writeFinish = new WriteFinish(context);
+        context.setWriteFinish(writeFinish);
+        bos.setWriteFinish(writeFinish);
     }
 
     @Override
     public void onRead(SelectionKey key) throws IOException {
-        if (bis.readFully(key) == -1) {
+        context.setKey(key);
+        if (bis.readFully() == -1) {
             register.cancel(sc);
         }
     }
 
     @Override
     public void onWrite(SelectionKey key) throws IOException {
-        if (bos.writeFully()) {
-            if (context.getRequest().getHeader("Connection").equalsIgnoreCase("keep-live"))
-                key.interestOps(SelectionKey.OP_READ);
-            else register.cancel(key.channel());
-        }
+        bos.writeFully();
     }
 }

@@ -1,19 +1,25 @@
-package cn.flandre.json.http.resolve;
+package cn.flandre.json.http.web;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-public class Cookie {
+public class RequestCookie {
     private final Map<String, String> cookies = new HashMap<>();
 
-    public Cookie(String cookie) {
+    public RequestCookie() {
+
+    }
+
+    public RequestCookie(String cookie) {
         if (cookie == null) return;
         String[] split = cookie.split(";");
         for (String item : split) {
             String[] items = item.trim().split("=");
-            cookies.put(items[0], items[1]);
+            if (items.length == 2)
+                cookies.put(items[0], items[1]);
+            else cookies.put(items[0], "");
         }
     }
 
@@ -33,10 +39,11 @@ public class Cookie {
         return cookies.entrySet();
     }
 
-    public String toString(String head) {
+    @Override
+    public String toString() {
         if (cookies.size() == 0) return null;
         StringBuilder builder = new StringBuilder();
-        builder.append(head);
+        builder.append("Cookie: ");
         Iterator<Map.Entry<String, String>> iterator = entry().iterator();
         Map.Entry<String, String> entry;
 
@@ -49,5 +56,9 @@ public class Cookie {
             builder.append("; ").append(entry.getKey()).append("=").append(entry.getValue());
         }
         return builder.toString();
+    }
+
+    public int size() {
+        return cookies.size();
     }
 }
