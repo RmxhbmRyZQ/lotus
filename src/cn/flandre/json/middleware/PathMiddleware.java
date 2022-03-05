@@ -4,6 +4,7 @@ import cn.flandre.json.controller.Controller;
 import cn.flandre.json.http.match.HttpContext;
 
 import java.util.LinkedList;
+import java.util.regex.Matcher;
 
 public class PathMiddleware {
     private final LinkedList<Pipeline> in;
@@ -16,19 +17,19 @@ public class PathMiddleware {
         this.controller = controller;
     }
 
-    public void solve(HttpContext context) {
+    public void handle(HttpContext context, Matcher matcher) {
         if (in != null)
             for (Pipeline pipeline : in) {
-                if (pipeline.handle(context)) {
+                if (pipeline.distribute(context, matcher)) {
                     return;
                 }
             }
 
-        controller.controller(context);
+        controller.distribute(context, matcher);
 
         if (out != null)
             for (Pipeline pipeline : out) {
-                if (pipeline.handle(context)) {
+                if (pipeline.distribute(context, matcher)) {
                     return;
                 }
             }

@@ -6,7 +6,6 @@ import cn.flandre.json.middleware.Pipeline;
 import cn.flandre.json.socket.stream.Block;
 
 import java.nio.channels.SelectionKey;
-import java.nio.charset.StandardCharsets;
 
 public class HttpBodyMatch implements Match {
     private int require;
@@ -47,12 +46,11 @@ public class HttpBodyMatch implements Match {
         PathGroup.match(context.getRequest().getPath(), context);
 
         for (Pipeline pipeline : GlobalMiddleware.out){
-            if (pipeline.handle(context))
+            if (pipeline.distribute(context, null))
                 return;
         }
 
         // 生成发送信息
-        System.out.println(context.getResponse());
         context.getResponse().write(context.getBos());
         context.getKey().interestOps(SelectionKey.OP_WRITE);
     }

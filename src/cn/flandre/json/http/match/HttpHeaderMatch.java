@@ -1,8 +1,11 @@
 package cn.flandre.json.http.match;
 
+import cn.flandre.json.constant.HttpState;
 import cn.flandre.json.constant.IOConstant;
+import cn.flandre.json.constant.Setting;
 import cn.flandre.json.exception.InvalidHttpHeaderException;
 import cn.flandre.json.http.web.Request;
+import cn.flandre.json.http.web.RequestMethod;
 import cn.flandre.json.http.web.Response;
 import cn.flandre.json.middleware.GlobalMiddleware;
 import cn.flandre.json.middleware.Pipeline;
@@ -34,13 +37,27 @@ public class HttpHeaderMatch implements Match {
                 context.setResponse(new Response());
 
                 for (Pipeline pipeline : GlobalMiddleware.in) {
-                    if (!pipeline.handle(context)) {
+                    if (!pipeline.distribute(context, null)) {
                         return;
                     }
                 }
 
                 String contentLength = request.getHeader("Content-Length");
-                match.setRequire(contentLength != null ? Integer.parseInt(contentLength) : 0);
+                int length = contentLength != null ? Integer.parseInt(contentLength) : 0;
+
+                if (length != 0 && request.getMethod() != RequestMethod.POST && request.getMethod() != RequestMethod.PUT) {
+                    context.getResponse().setStatusWithBody(HttpState.BAD_REQUEST);
+                    context.getWriteFinish().setClose(true);
+                    return;
+                }
+
+                if (length >= Setting.getSetting().getMaxContent()) {
+                    context.getResponse().setStatusWithBody(HttpState.REQUEST_ENTITY_TOO_LARGE);
+                    context.getWriteFinish().setClose(true);
+                    return;
+                }
+
+                match.setRequire(length);
                 match.match(read - index, block, offset + index);
                 context.getBis().setMatch(match);
             } catch (InvalidHttpHeaderException e) {
@@ -51,7 +68,8 @@ public class HttpHeaderMatch implements Match {
 
     private int indexOf(byte[] source, int r, int offset) {
         int off = offset;
-        int i, first = delimiter[0];
+        int i;
+        byte first = delimiter[0];
         if (offset == IOConstant.BLOCK_SIZE) offset = 0;
         int max = r + offset;
 

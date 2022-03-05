@@ -2,7 +2,9 @@ package cn.flandre.json.http.match;
 
 import cn.flandre.json.socket.stream.Block;
 
+import java.io.IOException;
 import java.nio.channels.SelectionKey;
+import java.nio.channels.SocketChannel;
 
 public class WriteFinish {
     private final HttpContext context;
@@ -21,9 +23,22 @@ public class WriteFinish {
             context.getRegister().cancel(key.channel());
             return;
         }
+
+        // 如果需要发送文件，没在公网测试过，不知道有没有错误
+        if (context.getResponse().shouldTransferTo()) {
+            try {
+                if (!context.getResponse().transfer((SocketChannel) context.getKey().channel())) {
+                    return;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                context.getRegister().cancel(key.channel());  // 出错，暂时就断开连接先吧
+            }
+        }
+
+        // 不支持长连接就关闭Socket
         HttpHeaderMatch match = context.getHttpHeaderMatch();
         String connection;
-        // 不支持长连接就关闭Socket
         if ((connection = context.getRequest().getHeader("Connection")) == null ||
                 !connection.equalsIgnoreCase("keep-live")) {
             context.getRegister().cancel(key.channel());

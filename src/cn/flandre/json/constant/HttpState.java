@@ -3,7 +3,7 @@ package cn.flandre.json.constant;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpConstant {
+public class HttpState {
     // status codes
     // informational
     public static final int CONTINUE = 100;

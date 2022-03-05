@@ -7,7 +7,6 @@ import cn.flandre.json.socket.stream.BlockInputStream;
 import cn.flandre.json.socket.stream.BlockOutputStream;
 
 import java.nio.channels.SelectionKey;
-import java.nio.channels.SocketChannel;
 
 public class HttpContext {
     private Request request;

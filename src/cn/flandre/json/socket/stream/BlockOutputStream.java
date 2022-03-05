@@ -3,7 +3,6 @@ package cn.flandre.json.socket.stream;
 import cn.flandre.json.exception.SystemBufferOverflowException;
 import cn.flandre.json.http.match.WriteFinish;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.channels.SocketChannel;
