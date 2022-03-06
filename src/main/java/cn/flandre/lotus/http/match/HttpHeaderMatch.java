@@ -56,7 +56,7 @@ public class HttpHeaderMatch implements Match {
     }
 
     private Response getResponse(Request request) {
-        Response response = new Response();
+        Response response = new Response(context.getResponseBody());
         Setting setting = HttpApplication.setting;
         response.addHead("Server", "lotus");
         response.addHead("Connection", setting.isKeepAlive() ? "keep-alive" : "close");

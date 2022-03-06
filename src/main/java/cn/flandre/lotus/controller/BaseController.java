@@ -4,7 +4,14 @@ import cn.flandre.lotus.exception.HttpException;
 import cn.flandre.lotus.constant.HttpState;
 import cn.flandre.lotus.http.match.HttpContext;
 import cn.flandre.lotus.http.web.Response;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
 
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 
 public class BaseController implements Controller {
@@ -37,5 +44,40 @@ public class BaseController implements Controller {
         Response response = context.getResponse();
         response.setStatus(permanent ? HttpState.MOVED_PERMANENTLY : HttpState.FOUND);
         response.addHead("Location", path);
+    }
+
+    /**
+     * @param path 模板路径
+     * @param filename 模板名称
+     * @param model 数据模型
+     * @param context 上下文
+     */
+    protected void render(String path, String filename, Map<Object, Object> model, HttpContext context) {
+        try {
+            Template template = getFreeMarkerCFG(path).getTemplate(filename);
+            OutputStream os = context.getResponse().getOS(path, filename);
+            Writer out = new OutputStreamWriter(os, StandardCharsets.UTF_8);
+            template.process(model, out);
+            context.getResponse().finish(os);
+        } catch (TemplateException | IOException e) {
+            throw new HttpException(HttpState.NOT_FOUND, false, false);
+        }
+    }
+
+    private Configuration configuration = null;
+
+    protected Configuration getFreeMarkerCFG(String sTemplateFilePath) {
+        if (null == configuration) {
+            configuration = new Configuration(Configuration.getVersion());
+            configuration.setEncoding(Locale.CHINA, "UTF-8");
+
+            // configuration.setClassForTemplateLoading(this.getClass(), "/");  // 根据类的路径加载
+            try {
+                configuration.setDirectoryForTemplateLoading(new File(sTemplateFilePath));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return configuration;
     }
 }

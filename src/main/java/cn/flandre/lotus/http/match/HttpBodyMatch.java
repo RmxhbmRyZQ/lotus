@@ -58,6 +58,7 @@ public class HttpBodyMatch implements Match {
             }
         }
 
+        context.getResponse().addHead("Content-Length", String.valueOf(context.getResponse().getBodyLength()));
         // 生成发送信息
         context.getResponse().write(context.getBos());
         context.getKey().interestOps(SelectionKey.OP_WRITE);

@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.Map;
 
 public abstract class Setting {
-    private JSONObject setting = new JSONObject();
+    private final JSONObject setting = new JSONObject();
 
     public Setting() throws JSONException {
         setting.put("ip", "0.0.0.0");

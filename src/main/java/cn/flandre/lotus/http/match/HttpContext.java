@@ -8,6 +8,9 @@ import cn.flandre.lotus.socket.stream.BlockOutputStream;
 
 import java.nio.channels.SelectionKey;
 
+/**
+ * 一个连接中使用的上下文
+ */
 public class HttpContext {
     private Request request;
     private Response response;
@@ -18,11 +21,13 @@ public class HttpContext {
     private final BlockInputStream bis;
     private final BlockOutputStream bos;
     private final Register register;
+    private final BlockOutputStream responseBody;
 
-    public HttpContext(BlockInputStream bis, BlockOutputStream bos, Register register) {
+    public HttpContext(BlockInputStream bis, BlockOutputStream bos, Register register, BlockOutputStream body) {
         this.bis = bis;
         this.bos = bos;
         this.register = register;
+        responseBody = body;
     }
 
     public SelectionKey getKey() {
@@ -83,5 +88,9 @@ public class HttpContext {
 
     public BlockInputStream getBis() {
         return bis;
+    }
+
+    public BlockOutputStream getResponseBody() {
+        return responseBody;
     }
 }

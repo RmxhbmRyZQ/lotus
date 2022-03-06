@@ -29,8 +29,16 @@ public class WriteFinish {
             return;
         }
 
-        // 如果需要发送文件，没在公网测试过，不知道有没有错误
-        if (response.shouldTransferTo()) {
+        if (response.shouldWriteBody()) {
+            try {
+                if (!context.getResponseBody().writeFully()) {
+                    return;
+                }
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+                register.cancel(key.channel());
+            }
+        } else if (response.shouldTransferTo()) {  // 如果需要发送文件，没在公网测试过，不知道有没有错误
             try {
                 if (!response.transfer((SocketChannel) context.getKey().channel())) {
                     return;
@@ -41,7 +49,7 @@ public class WriteFinish {
             }
         }
 
-        if (!response.getHead("Connection").equalsIgnoreCase("keep-alive")){
+        if (!response.getHead("Connection").equalsIgnoreCase("keep-alive")) {
             register.cancel(key.channel());
             return;
         }

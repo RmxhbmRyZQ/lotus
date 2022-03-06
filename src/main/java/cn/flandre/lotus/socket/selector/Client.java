@@ -9,28 +9,30 @@ import cn.flandre.lotus.http.web.Response;
 import cn.flandre.lotus.socket.stream.BlockInputStream;
 import cn.flandre.lotus.socket.stream.BlockOutputStream;
 import cn.flandre.lotus.socket.stream.FreeBlock;
+import cn.flandre.lotus.socket.stream.SocksOutputStream;
 
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
+/**
+ * 连接的封装处理，由于多路复用的关系，不需要进行线程同步的处理
+ */
 public class Client extends AbstractSelect {
     private final SocketChannel sc;
     private final Register register;
     private final BlockInputStream bis;
     private final BlockOutputStream bos;
-    private HttpContext context;
+    private final HttpContext context;
 
     public Client(SocketChannel sc, Register register, FreeBlock freeBlock) {
         this.sc = sc;
         this.register = register;
+        SocksOutputStream sos = new SocksOutputStream(sc);
         bis = new BlockInputStream(sc, freeBlock);
-        bos = new BlockOutputStream(sc, freeBlock);
-        initMatch();
-    }
+        bos = new BlockOutputStream(sos, freeBlock);
 
-    private void initMatch() {
-        context = new HttpContext(bis, bos, register);
+        context = new HttpContext(bis, bos, register, new BlockOutputStream(sos, freeBlock));
         HttpHeaderMatch httpHeaderMatch = new HttpHeaderMatch(context);
         HttpBodyMatch httpBodyMatch = new HttpBodyMatch(context);
         context.setHttpHeaderMatch(httpHeaderMatch);
@@ -56,7 +58,7 @@ public class Client extends AbstractSelect {
             }
             Response response = context.getResponse();
             if (response == null)
-                response = new Response();
+                response = new Response(context.getResponseBody());
             if (e.getBody() != null) {
                 response.setStatus(e.getStatus());
                 response.setBody(e.getBody());

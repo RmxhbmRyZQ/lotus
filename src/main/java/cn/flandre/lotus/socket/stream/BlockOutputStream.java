@@ -5,7 +5,6 @@ import cn.flandre.lotus.http.match.WriteFinish;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 
@@ -15,11 +14,12 @@ public class BlockOutputStream extends OutputStream {
     private final SocksOutputStream os;
     private Block buffer;
     private WriteFinish writeFinish;
+    private long len;
 
-    public BlockOutputStream(SocketChannel sc, FreeBlock freeBlock) {
+    public BlockOutputStream(SocksOutputStream sos, FreeBlock freeBlock) {
         this.freeBlock = freeBlock;
         queue = new LinkedList<>();
-        os = new SocksOutputStream(sc);
+        os = sos;
         buffer = freeBlock.poll();
         queue.add(buffer);
     }
@@ -29,6 +29,7 @@ public class BlockOutputStream extends OutputStream {
         while (true) {
             Block block = queue.poll();  // 从写入队列取出块来写
             w = block.write(os);
+            len -= w;
             block.incPos(w);
             if (block.isEmpty()) {
                 if (queue.size() != 0)
@@ -39,7 +40,8 @@ public class BlockOutputStream extends OutputStream {
                 }
                 try {
                     os.flush();
-                    writeFinish.writeFinish();
+                    if (writeFinish != null)
+                        writeFinish.writeFinish();
                     return true;
                 } catch (SystemBufferOverflowException e) {
                     return false;
@@ -66,27 +68,35 @@ public class BlockOutputStream extends OutputStream {
     public void write(int b) {
         check();
         buffer.write(b);
+        len++;
     }
 
     @Override
     public void write(byte[] b) {
+        if (b == null) return;
         write(b, 0, b.length);
     }
 
-    public void write(String s){
+    public void write(String s) {
         write(s.getBytes(StandardCharsets.UTF_8));
     }
 
     @Override
     public void write(byte[] b, int off, int len) {
+        if (b == null) return;
         int write = 0;
         while (write < len) {
             check();
             write += buffer.write(b, write + off, len - write);
         }
+        this.len += len;
     }
 
     public boolean available() {
         return !queue.getFirst().isEmpty();
+    }
+
+    public long size(){
+        return len;
     }
 }

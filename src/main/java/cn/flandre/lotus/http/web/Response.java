@@ -1,12 +1,15 @@
 package cn.flandre.lotus.http.web;
 
 import cn.flandre.lotus.HttpApplication;
+import cn.flandre.lotus.constant.ContentType;
 import cn.flandre.lotus.constant.HttpState;
+import cn.flandre.lotus.http.match.HttpContext;
 import cn.flandre.lotus.socket.stream.BlockOutputStream;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -16,7 +19,11 @@ public class Response {
     private int status = HttpState.OK;
     private final Map<String, String> headers = new HashMap<>();
     private final ResponseCookie cookies = new ResponseCookie();
-    private final ResponseBody body = new ResponseBody(this);
+    private final ResponseBody body;
+
+    public Response(BlockOutputStream body) {
+        this.body = new ResponseBody(this, body);
+    }
 
     public void addHead(String key, String value) {
         headers.put(key, value);
@@ -65,8 +72,6 @@ public class Response {
             bos.write(cookies.toString());
         }
         bos.write("\r\n\r\n");
-        if (body.shouldWriteBody())
-            body.writeBody(bos);
     }
 
     @Override
@@ -87,9 +92,23 @@ public class Response {
         return body.shouldTransferTo();
     }
 
-
     public boolean transfer(SocketChannel channel) throws IOException {
         return body.transfer(channel);
+    }
+
+    public void setJsonBody(String jsonBody){
+        setBody(jsonBody);
+        headers.put("Content-Type", ContentType.getContentType(".json"));
+    }
+
+    public void setTextBody(String jsonBody){
+        setBody(jsonBody);
+        headers.put("Content-Type", ContentType.getContentType(".txt"));
+    }
+
+    public void setHtmlBody(String jsonBody){
+        setBody(jsonBody);
+        headers.put("Content-Type", ContentType.getContentType(".html"));
     }
 
     public void setBody(byte[] body) {
@@ -113,5 +132,21 @@ public class Response {
         if (header.contains(HttpApplication.setting.getContentEncrypt())) {
             body.setEncrypt(true);
         }
+    }
+
+    public void finish(OutputStream os) throws IOException {
+        body.finish(os);
+    }
+
+    public OutputStream getOS(String path, String filename) {
+        return body.getOS(path, filename);
+    }
+
+    public boolean shouldWriteBody() {
+        return body.shouldWriteBody();
+    }
+
+    public long getBodyLength() {
+        return body.length();
     }
 }
