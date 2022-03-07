@@ -4,7 +4,7 @@ import cn.flandre.lotus.constant.HttpState;
 import cn.flandre.lotus.controller.Controller;
 import cn.flandre.lotus.exception.HttpException;
 import cn.flandre.lotus.http.match.HttpContext;
-import cn.flandre.lotus.middleware.PathMiddleware;
+import cn.flandre.lotus.middleware.PathMiddlewareBean;
 import cn.flandre.lotus.middleware.Pipeline;
 
 import java.util.LinkedList;
@@ -17,11 +17,11 @@ public class PathGroup {
     }
 
     public static void addPath(String path, LinkedList<Pipeline> in, LinkedList<Pipeline> out, Controller controller){
-        paths.add(new Path(path, new PathMiddleware(in, out, controller)));
+        paths.add(new Path(path, new PathMiddlewareBean(in, out, controller)));
     }
 
     public static void addPath(String path, Pipeline in, Pipeline out, Controller controller){
-        paths.add(new Path(path, new PathMiddleware(new LinkedList<Pipeline>(){{add(in);}},
+        paths.add(new Path(path, new PathMiddlewareBean(new LinkedList<Pipeline>(){{add(in);}},
                 new LinkedList<Pipeline>(){{add(out);}}, controller)));
     }
 

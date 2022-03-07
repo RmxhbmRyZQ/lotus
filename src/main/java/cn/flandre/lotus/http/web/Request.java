@@ -1,9 +1,14 @@
 package cn.flandre.lotus.http.web;
 
+import cn.flandre.lotus.HttpApplication;
 import cn.flandre.lotus.exception.HttpException;
 import cn.flandre.lotus.constant.HttpState;
+import cn.flandre.lotus.http.match.HttpContext;
+import cn.flandre.lotus.http.session.DatabaseSession;
+import cn.flandre.lotus.http.session.Session;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -17,6 +22,7 @@ public class Request {
     private final String protocol;
     private final Map<String, Object> extra = new HashMap<>();
     private static final byte[] sep = "\r\n\r\n".getBytes(StandardCharsets.UTF_8);
+    private Session session;
 
     public Request(String httpHeader) {
         String[] fields = httpHeader.split("\r\n");
@@ -240,5 +246,33 @@ public class Request {
      */
     public Map<String, Object> getExtras() {
         return extra;
+    }
+
+    /**
+     * 获取session
+     */
+    public Session getSession(HttpContext context) {
+        if (session == null) {
+            if (!HttpApplication.setting.getUseSession()) return null;
+            Request request = context.getRequest();
+            switch (HttpApplication.setting.getSessionStore()) {
+                case "cache":
+                    break;
+                case "database":
+                    session = new DatabaseSession(context.getDatabase(), request.getCookie("SessionID"));
+                    session.refresh();
+                    break;
+                case "file":
+                    break;
+            }
+        }
+        return session;
+    }
+
+    public void releaseSession(Response response) {
+        if (session == null) return;
+        session.updateAttribute();
+        response.setCookie(new SetCookieItem("SessionID",
+                session.getID(), new Date(session.getExpireTime())));
     }
 }

@@ -3,5 +3,7 @@
   "databaseUsername": "root",
   "databasePassword": "",
   "useDatabase": true,
-  "databaseDriver": "com.mysql.jdbc.Driver"
+  "databaseDriver": "com.mysql.jdbc.Driver",
+  "useSession": true,
+  "sessionStore": "database"
 }

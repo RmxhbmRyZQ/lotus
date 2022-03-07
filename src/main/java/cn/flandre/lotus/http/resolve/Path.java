@@ -1,34 +1,34 @@
 package cn.flandre.lotus.http.resolve;
 
 import cn.flandre.lotus.controller.Controller;
-import cn.flandre.lotus.middleware.PathMiddleware;
+import cn.flandre.lotus.middleware.PathMiddlewareBean;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Path {
     private final Pattern pattern;
-    private final PathMiddleware pathMiddleware;
+    private final PathMiddlewareBean pathMiddlewareBean;
     private Matcher matcher;
 
-    public Path(Pattern pattern, PathMiddleware pathMiddleware) {
+    public Path(Pattern pattern, PathMiddlewareBean pathMiddlewareBean) {
         this.pattern = pattern;
-        this.pathMiddleware = pathMiddleware;
+        this.pathMiddlewareBean = pathMiddlewareBean;
     }
 
     public Path(Pattern pattern, Controller controller) {
         this.pattern = pattern;
-        this.pathMiddleware = new PathMiddleware(controller);
+        this.pathMiddlewareBean = new PathMiddlewareBean(controller);
     }
 
     public Path(String pattern, Controller controller) {
         this.pattern = Pattern.compile(pattern);
-        this.pathMiddleware = new PathMiddleware(controller);
+        this.pathMiddlewareBean = new PathMiddlewareBean(controller);
     }
 
-    public Path(String pattern, PathMiddleware pathMiddleware) {
+    public Path(String pattern, PathMiddlewareBean pathMiddlewareBean) {
         this.pattern = Pattern.compile(pattern);
-        this.pathMiddleware = pathMiddleware;
+        this.pathMiddlewareBean = pathMiddlewareBean;
     }
 
     public boolean match(String uri) {
@@ -40,7 +40,7 @@ public class Path {
         return matcher;
     }
 
-    public PathMiddleware getPathPurification() {
-        return pathMiddleware;
+    public PathMiddlewareBean getPathPurification() {
+        return pathMiddlewareBean;
     }
 }

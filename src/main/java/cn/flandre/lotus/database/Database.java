@@ -45,13 +45,14 @@ public class Database {
     }
 
     public Statement getStatement() throws SQLException {
+        ensureConnectionOpen();
         if (statement == null || statement.isClosed()) {
             statement = connection.createStatement();
         }
         return statement;
     }
 
-    public PreparedStatement prepareSql(String sql, String[] strings) throws SQLException {
+    public PreparedStatement prepareSql(String sql, Object[] strings) throws SQLException {
         PreparedStatement preparedStatement = statementMap.get(sql);
 
         if (preparedStatement == null || preparedStatement.isClosed()) {
@@ -62,13 +63,13 @@ public class Database {
         preparedStatement.clearParameters();
 
         for (int i = 0; i < strings.length; i++) {
-            preparedStatement.setString(i + 1, strings[i]);
+            preparedStatement.setObject(i + 1, strings[i]);
         }
 
         return preparedStatement;
     }
 
-    public ResultSet query(String sql, String[] strings) throws SQLException {
+    public ResultSet query(String sql, Object[] strings) throws SQLException {
         if (strings == null || strings.length == 0) {
             return query(sql);
         }
@@ -86,7 +87,7 @@ public class Database {
         return statement.executeQuery(sql);
     }
 
-    public int insert(String sql, String[] strings) throws SQLException {
+    public int insert(String sql, Object[] strings) throws SQLException {
         if (strings == null || strings.length == 0) {
             return insert(sql);
         }
@@ -104,7 +105,7 @@ public class Database {
         return statement.executeUpdate(sql);
     }
 
-    public boolean delete(String sql, String[] strings) throws SQLException {
+    public boolean delete(String sql, Object[] strings) throws SQLException {
         if (strings == null || strings.length == 0) {
             return delete(sql);
         }
@@ -122,7 +123,7 @@ public class Database {
         return statement.execute(sql);
     }
 
-    public int update(String sql, String[] strings) throws SQLException {
+    public int update(String sql, Object[] strings) throws SQLException {
         return insert(sql, strings);
     }
 

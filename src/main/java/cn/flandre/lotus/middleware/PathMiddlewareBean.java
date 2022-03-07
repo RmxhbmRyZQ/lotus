@@ -6,18 +6,18 @@ import cn.flandre.lotus.http.match.HttpContext;
 import java.util.LinkedList;
 import java.util.regex.Matcher;
 
-public class PathMiddleware {
+public class PathMiddlewareBean {
     private final LinkedList<Pipeline> in;
     private final LinkedList<Pipeline> out;
     private final Controller controller;
 
-    public PathMiddleware(LinkedList<Pipeline> in, LinkedList<Pipeline> out, Controller controller) {
+    public PathMiddlewareBean(LinkedList<Pipeline> in, LinkedList<Pipeline> out, Controller controller) {
         this.in = in;
         this.out = out;
         this.controller = controller;
     }
 
-    public PathMiddleware(Controller controller){
+    public PathMiddlewareBean(Controller controller){
         this(null, null, controller);
     }
 

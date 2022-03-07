@@ -1,7 +1,7 @@
 package cn.flandre.lotus.http.match;
 
 import cn.flandre.lotus.http.resolve.PathGroup;
-import cn.flandre.lotus.middleware.GlobalMiddleware;
+import cn.flandre.lotus.middleware.GlobalMiddlewareBean;
 import cn.flandre.lotus.middleware.Pipeline;
 import cn.flandre.lotus.socket.stream.Block;
 
@@ -46,19 +46,20 @@ public class HttpBodyMatch implements Match {
         context.getRequest().setContent(content);
 
         boolean skip = false;
-        for (Pipeline pipeline : GlobalMiddleware.in) {  // 全局入中间件
+        for (Pipeline pipeline : GlobalMiddlewareBean.in) {  // 全局入中间件
             if ((skip = pipeline.distribute(context, null))) {
                 break;
             }
         }
 
         if (!skip && !PathGroup.match(context.getRequest().getPath(), context)) {  // 路径分发
-            for (Pipeline pipeline : GlobalMiddleware.out) {  // 全局出中间件
+            for (Pipeline pipeline : GlobalMiddlewareBean.out) {  // 全局出中间件
                 if (pipeline.distribute(context, null))
                     break;
             }
         }
 
+        context.getRequest().releaseSession(context.getResponse());
         // 设置响应体大小
         context.getResponse().addHead("Content-Length", String.valueOf(context.getResponse().getBodyLength()));
         // 生成发送信息

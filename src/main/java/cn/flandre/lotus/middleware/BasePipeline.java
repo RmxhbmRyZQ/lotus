@@ -27,7 +27,7 @@ public class BasePipeline implements Pipeline {
     }
 
     @Override
-    public boolean put(HttpState constant, Matcher matcher) {
+    public boolean put(HttpContext context, Matcher matcher) {
         return false;
     }
 }

@@ -15,7 +15,7 @@ public interface Pipeline {
 
     public boolean delete(HttpContext context, Matcher matcher);
 
-    public boolean put(HttpState constant, Matcher matcher);
+    public boolean put(HttpContext context, Matcher matcher);
 
     public default boolean distribute(HttpContext context, Matcher matcher) {
         switch (context.getRequest().getMethod()) {

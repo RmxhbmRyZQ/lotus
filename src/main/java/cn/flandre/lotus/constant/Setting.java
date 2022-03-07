@@ -21,6 +21,8 @@ public abstract class Setting {
         setting.put("minEncryptLength", 2 * 1024);
         setting.put("maxEncryptLength", 10 * 1024 * 1024);
         setting.put("useDatabase", false);
+        setting.put("useSession", false);
+        setting.put("sessionStore", "cache");
         // 如果useDatabase为true时，下面四个一定要定义
         setting.put("databaseDriver", "");
         setting.put("databaseUri", "");
@@ -41,7 +43,19 @@ public abstract class Setting {
         }
     }
 
-    public abstract void initPath();
+    public void init(){
+        initPath();
+        initMiddleware();
+    }
+
+    protected void initMiddleware() {
+//        if (HttpApplication.setting.getUseSession()) {
+//            GlobalMiddlewareBean.addIn(new SessionInMiddleware());
+//            GlobalMiddlewareBean.addOut(new SessionOutMiddleware());
+//        }
+    }
+
+    protected abstract void initPath();
 
     public int getMaxHttpHead() {
         return setting.getInt("maxHttpHead");
@@ -79,12 +93,20 @@ public abstract class Setting {
         return setting.getInt("minEncryptLength");
     }
 
+    public String getSessionStore() {
+        return setting.getString("sessionStore");
+    }
+
     public String getDatabaseDriver() {
         return setting.getString("databaseDriver");
     }
 
     public boolean getUseDataBase() {
         return setting.getBoolean("useDatabase");
+    }
+
+    public boolean getUseSession() {
+        return setting.getBoolean("useSession");
     }
 
     public Object get(String key) {

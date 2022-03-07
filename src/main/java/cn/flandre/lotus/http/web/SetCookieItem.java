@@ -48,7 +48,7 @@ public class SetCookieItem {
         if (domain != null)
             builder.append("; domain=").append(domain);
         if (path != null)
-            builder.append("; path").append(path);
+            builder.append("; path=").append(path);
         if (secure)
             builder.append("; secure");
         if (httpOnly)

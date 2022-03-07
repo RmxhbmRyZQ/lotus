@@ -30,13 +30,6 @@ public class ResponseBody {
         this.body = body;
     }
 
-//    private void writeGZIP(byte[] bytes) throws IOException {
-//        GZIPOutputStream gos = new GZIPOutputStream(body);
-//        gos.write(bytes);
-//        gos.finish();
-//        response.addHead("Content-Encoding", "gzip");
-//    }
-
     public void setBody(byte[] body) {
         if (fileBody != null)
             throw new ResponseBodyAlreadySetException("Cannot set body, when the filebody have been set");

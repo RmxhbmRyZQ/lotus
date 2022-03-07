@@ -10,7 +10,7 @@ public class HttpApplication {
 
     public static void run(Setting setting) {
         HttpApplication.setting = setting;
-        setting.initPath();
+        setting.init();
         try {
             new Boss().loop();
         } catch (IOException ioException) {

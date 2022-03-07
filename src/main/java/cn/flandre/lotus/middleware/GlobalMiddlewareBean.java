@@ -2,7 +2,7 @@ package cn.flandre.lotus.middleware;
 
 import java.util.LinkedList;
 
-public class GlobalMiddleware {
+public class GlobalMiddlewareBean {
     public final static LinkedList<Pipeline> in = new LinkedList<>();  // 在解析完request head时调用
     public final static LinkedList<Pipeline> out = new LinkedList<>();
 

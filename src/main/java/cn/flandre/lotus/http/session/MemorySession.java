@@ -10,4 +10,24 @@ public class MemorySession implements Session {
     public void setAttribute(String key, String value) {
 
     }
+
+    @Override
+    public boolean updateAttribute() {
+        return false;
+    }
+
+    @Override
+    public boolean refresh() {
+        return false;
+    }
+
+    @Override
+    public long getExpireTime() {
+        return 0;
+    }
+
+    @Override
+    public String getID() {
+        return null;
+    }
 }
