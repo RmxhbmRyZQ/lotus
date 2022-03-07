@@ -16,19 +16,20 @@ public class Request {
     private final Map<String, String> params = new HashMap<>();
     private final String protocol;
     private final Map<String, Object> extra = new HashMap<>();
+    private static final byte[] sep = "\r\n\r\n".getBytes(StandardCharsets.UTF_8);
 
     public Request(String httpHeader) {
         String[] fields = httpHeader.split("\r\n");
         if (fields.length == 0)
-            throw new HttpException(HttpState.BAD_REQUEST, false);
+            throw new HttpException(HttpState.BAD_REQUEST);
 
         String[] head = fields[0].split(" ");
         if (head.length < 3)
-            throw new HttpException(HttpState.BAD_REQUEST, false);
+            throw new HttpException(HttpState.BAD_REQUEST);
 
         method = RequestMethod.parseString(head[0]);
         if (method == RequestMethod.IGNORANT_METHOD)
-            throw new HttpException(HttpState.BAD_REQUEST, false);
+            throw new HttpException(HttpState.BAD_REQUEST);
 
         String uri = head[1];
         int find = uri.indexOf('?');
@@ -40,8 +41,9 @@ public class Request {
 
         protocol = head[2];
         if (!protocol.startsWith("HTTP/"))
-            throw new HttpException(HttpState.BAD_REQUEST, false);
+            throw new HttpException(HttpState.HTTP_VERSION_NOT_SUPPORTED);
 
+        // 解析 HTTP 请求头键值对
         for (int i = 1; i < fields.length; i++) {
             String[] split = fields[i].split(":", 2);
             headers.put(split[0], split[1].trim());
@@ -67,10 +69,6 @@ public class Request {
         if (find != -1) {
             map.put(item.substring(0, find), item.substring(find + 1));
         }
-    }
-
-    public String getParam(String key) {
-        return params.get(key);
     }
 
     private String join(Map<String, String> map, String inner, String line) {
@@ -104,22 +102,44 @@ public class Request {
         return builder.toString();
     }
 
+    /**
+     * 获取Uri上的键值对
+     */
+    public String getParam(String key) {
+        return params.get(key);
+    }
+
+    /**
+     * 获取请求头
+     */
     public String getHeader(String key) {
         return headers.get(key);
     }
 
+    /**
+     * 获取Cookie
+     */
     public String getCookie(String key) {
         return cookies.get(key);
     }
 
+    /**
+     * 获取请求的方法
+     */
     public RequestMethod getMethod() {
         return method;
     }
 
+    /**
+     * 获取uri
+     */
     public String getPath() {
         return path;
     }
 
+    /**
+     * 获取协议
+     */
     public String getProtocol() {
         return protocol;
     }
@@ -157,7 +177,6 @@ public class Request {
             setKeyValues(new String(content), normalBody);
         } else if (contentType.startsWith("multipart/form-data")) {  // 文件上传
             byte[] boundary = contentType.substring(contentType.indexOf("boundary") + 9).getBytes(StandardCharsets.UTF_8);
-            byte[] sep = "\r\n\r\n".getBytes(StandardCharsets.UTF_8);
             int offset = 0, start, end = 0;
             fileBody = new HashMap<>();
             MultipartData data = null;
@@ -178,16 +197,21 @@ public class Request {
                 String head = new String(content, offset, end - sep.length - offset);
                 data = new MultipartData(head);
                 fileBody.put(data.getKey(), data);
-                System.out.println(head);
             }
-        } else this.content = content;
+        } else this.content = content;  // 其他请求如JSON
     }
 
+    /**
+     * 获取键值对的请求体
+     */
     public String getNormalBody(String key) {
         if (normalBody == null) return null;
         return normalBody.get(key);
     }
 
+    /**
+     * 获取文件上传的请求体
+     */
     public MultipartData getFileBody(String key) {
         if (fileBody == null) return null;
         return fileBody.get(key);
@@ -197,11 +221,24 @@ public class Request {
         return content;
     }
 
+    /**
+     * 设置额外信息
+     */
     public void putExtra(String key, Object value) {
         extra.put(key, value);
     }
 
+    /**
+     * 获取额外信息
+     */
     public Object getExtra(String key) {
         return extra.get(key);
+    }
+
+    /**
+     * 获取额外的键值对
+     */
+    public Map<String, Object> getExtras() {
+        return extra;
     }
 }

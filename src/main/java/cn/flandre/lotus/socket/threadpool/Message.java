@@ -2,6 +2,9 @@ package cn.flandre.lotus.socket.threadpool;
 
 import java.util.LinkedList;
 
+/**
+ * 消息队列的消息
+ */
 public class Message {
     private static final LinkedList<Message> freeQueue = new LinkedList<>();
 

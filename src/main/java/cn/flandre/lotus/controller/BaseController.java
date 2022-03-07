@@ -14,32 +14,42 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 
+/**
+ * 基础控制器，写控制器时首要继承类
+ */
 public class BaseController implements Controller {
     @Override
     public void get(HttpContext context, Matcher matcher) {
-        throw new HttpException(HttpState.NOT_FOUND, false, false);
+        throw new HttpException(HttpState.NOT_FOUND, false);
     }
 
     @Override
     public void post(HttpContext context, Matcher matcher) {
-        throw new HttpException(HttpState.NOT_FOUND, false, false);
+        throw new HttpException(HttpState.NOT_FOUND, false);
     }
 
     @Override
     public void head(HttpContext context, Matcher matcher) {
-        throw new HttpException(HttpState.NOT_FOUND, false, false);
+        throw new HttpException(HttpState.NOT_FOUND, false);
     }
 
     @Override
     public void delete(HttpContext context, Matcher matcher) {
-        throw new HttpException(HttpState.NOT_FOUND, false, false);
+        throw new HttpException(HttpState.NOT_FOUND, false);
     }
 
     @Override
     public void put(HttpContext context, Matcher matcher) {
-        throw new HttpException(HttpState.NOT_FOUND, false, false);
+        throw new HttpException(HttpState.NOT_FOUND, false);
     }
 
+    /**
+     * 页面跳转
+     *
+     * @param context 上下文
+     * @param path 跳转的路径
+     * @param permanent true 301, false 302
+     */
     protected void redirect(HttpContext context, String path, boolean permanent) {
         Response response = context.getResponse();
         response.setStatus(permanent ? HttpState.MOVED_PERMANENTLY : HttpState.FOUND);
@@ -47,6 +57,8 @@ public class BaseController implements Controller {
     }
 
     /**
+     * 模板渲染，使用freemarker
+     *
      * @param path 模板路径
      * @param filename 模板名称
      * @param model 数据模型
@@ -60,7 +72,7 @@ public class BaseController implements Controller {
             template.process(model, out);
             context.getResponse().finish(os);
         } catch (TemplateException | IOException e) {
-            throw new HttpException(HttpState.NOT_FOUND, false, false);
+            throw new HttpException(HttpState.NOT_FOUND, false);
         }
     }
 

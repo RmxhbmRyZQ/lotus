@@ -10,10 +10,11 @@ import java.io.IOException;
  */
 public class Boss {
     private final IOLoop loop;
-    private final ThreadPool pool = new ThreadPool();
+    private final ThreadPool pool;
 
     public Boss() throws IOException {
         loop = new IOLoop();
+        pool = new ThreadPool();
     }
 
     public void loop() throws IOException {

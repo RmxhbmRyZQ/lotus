@@ -16,7 +16,7 @@ public enum RequestMethod {
             case "DELETE":
                 return DELETE;
             default:
-                return IGNORANT_METHOD;
+                return IGNORANT_METHOD;  // 请求方法未知
         }
     }
 }

@@ -8,8 +8,8 @@ import cn.flandre.lotus.http.match.WriteFinish;
 import cn.flandre.lotus.http.web.Response;
 import cn.flandre.lotus.socket.stream.BlockInputStream;
 import cn.flandre.lotus.socket.stream.BlockOutputStream;
-import cn.flandre.lotus.socket.stream.FreeBlock;
 import cn.flandre.lotus.socket.stream.SocksOutputStream;
+import cn.flandre.lotus.socket.threadpool.Worker;
 
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
@@ -25,14 +25,16 @@ public class Client extends AbstractSelect {
     private final BlockOutputStream bos;
     private final HttpContext context;
 
-    public Client(SocketChannel sc, Register register, FreeBlock freeBlock) {
+    public Client(SocketChannel sc, Register register, Worker worker) {
         this.sc = sc;
         this.register = register;
         SocksOutputStream sos = new SocksOutputStream(sc);
-        bis = new BlockInputStream(sc, freeBlock);
-        bos = new BlockOutputStream(sos, freeBlock);
+        bis = new BlockInputStream(sc, worker.getFreeBlock());
+        bos = new BlockOutputStream(sos, worker.getFreeBlock());
 
-        context = new HttpContext(bis, bos, register, new BlockOutputStream(sos, freeBlock));
+        // 初始化连接的上下文
+        context = new HttpContext(bis, bos, register, new BlockOutputStream(sos, worker.getFreeBlock()));
+        context.setDatabase(worker.getDatabase());
         HttpHeaderMatch httpHeaderMatch = new HttpHeaderMatch(context);
         HttpBodyMatch httpBodyMatch = new HttpBodyMatch(context);
         context.setHttpHeaderMatch(httpHeaderMatch);
@@ -59,12 +61,14 @@ public class Client extends AbstractSelect {
             Response response = context.getResponse();
             if (response == null)
                 response = new Response(context.getResponseBody());
+            // 设置错误信息
             if (e.getBody() != null) {
                 response.setStatus(e.getStatus());
                 response.setBody(e.getBody());
             } else
                 response.setStatusWithBody(e.getStatus());
             response.write(bos);
+            // 发送消息
             key.interestOps(SelectionKey.OP_WRITE);
             context.getWriteFinish().setClose(e.isClose());
         }

@@ -3,7 +3,6 @@ package cn.flandre.lotus.http.web;
 import cn.flandre.lotus.HttpApplication;
 import cn.flandre.lotus.constant.ContentType;
 import cn.flandre.lotus.constant.HttpState;
-import cn.flandre.lotus.http.match.HttpContext;
 import cn.flandre.lotus.socket.stream.BlockOutputStream;
 
 import java.io.File;

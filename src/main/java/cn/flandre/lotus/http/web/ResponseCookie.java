@@ -3,6 +3,9 @@ package cn.flandre.lotus.http.web;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+/**
+ * 响应头的Cookie
+ */
 public class ResponseCookie {
     private final LinkedList<SetCookieItem> cookies = new LinkedList<>();
 

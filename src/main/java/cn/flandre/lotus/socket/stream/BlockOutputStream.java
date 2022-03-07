@@ -40,7 +40,7 @@ public class BlockOutputStream extends OutputStream {
                 }
                 try {
                     os.flush();
-                    if (writeFinish != null)
+                    if (writeFinish != null)  // 写完成，回调
                         writeFinish.writeFinish();
                     return true;
                 } catch (SystemBufferOverflowException e) {

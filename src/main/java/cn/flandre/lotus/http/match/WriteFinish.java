@@ -13,7 +13,7 @@ public class WriteFinish {
     private int read;
     private int offset;
     private Block block;
-    private boolean close = false;
+    private boolean close = false;  // 是否关闭socket
 
     public WriteFinish(HttpContext context) {
         this.context = context;
@@ -24,11 +24,7 @@ public class WriteFinish {
         SelectionKey key = context.getKey();
         Register register = context.getRegister();
 
-        if (close) {
-            register.cancel(key.channel());
-            return;
-        }
-
+        // 发送响应体
         if (response.shouldWriteBody()) {
             try {
                 if (!context.getResponseBody().writeFully()) {
@@ -49,12 +45,18 @@ public class WriteFinish {
             }
         }
 
+        if (close) {
+            register.cancel(key.channel());
+            return;
+        }
+
+        // 如果服务器不支持长连接就关闭socket
         if (!response.getHead("Connection").equalsIgnoreCase("keep-alive")) {
             register.cancel(key.channel());
             return;
         }
 
-        // 不支持长连接就关闭Socket
+        // 如果客户端不支持长连接就关闭Socket
         HttpHeaderMatch match = context.getHttpHeaderMatch();
         String connection;
         if ((connection = context.getRequest().getHeader("Connection")) == null ||
@@ -67,7 +69,7 @@ public class WriteFinish {
             key.interestOps(SelectionKey.OP_READ);
             return;
         }
-        // 读了下一个请求的信息
+        // 如果缓存有下一个请求头信息，则进行处理
         context.getBis().setMatch(match);
         match.match(read, block, offset);
         if (!context.getBos().available())

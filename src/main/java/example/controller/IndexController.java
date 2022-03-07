@@ -13,6 +13,5 @@ public class IndexController extends BaseController {
         Map<Object, Object> map = new HashMap<>();
         map.put("name", "john");
         render("./template", "index.html", map, context);
-        
     }
 }

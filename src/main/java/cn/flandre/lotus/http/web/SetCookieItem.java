@@ -5,9 +5,9 @@ import java.util.Date;
 public class SetCookieItem {
     private final String key;
     private final String value;
-    private Date expires;  // DAY, DD MMM YYYY HH:MM:SS GMT
-    private String domain;
-    private String path;
+    private Date expires;  // 过期时间:DAY, DD MMM YYYY HH:MM:SS GMT
+    private String domain;  // 域名
+    private String path;  // 路径
     private boolean secure;
     private boolean httpOnly;
 

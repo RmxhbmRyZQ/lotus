@@ -38,6 +38,9 @@ public class MultipartData {
         return key;
     }
 
+    /**
+     * 拿到对应的值，客户端发来的是文件，拿到的或是null
+     */
     public String getValue() {
         return value;
     }
@@ -46,6 +49,9 @@ public class MultipartData {
         return filename;
     }
 
+    /**
+     * 获取文件类型，客户端发送的不是文件为null
+     */
     public String getType() {
         return type;
     }
@@ -54,10 +60,21 @@ public class MultipartData {
         this.fileItem = fileItem;
     }
 
+    /**
+     * 保存上传的文件
+     *
+     * @param path 文件保存的路径
+     */
     public void upload(String path) throws IOException {
         upload(path, filename);
     }
 
+    /**
+     * 保存上传的文件
+     *
+     * @param path 文件保存的路径
+     * @param filename 保存的文件名
+     */
     public void upload(String path, String filename) throws IOException {
         if (fileItem == null) return;
         File directory = new File(path);

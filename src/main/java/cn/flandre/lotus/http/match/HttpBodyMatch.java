@@ -8,7 +8,7 @@ import cn.flandre.lotus.socket.stream.Block;
 import java.nio.channels.SelectionKey;
 
 public class HttpBodyMatch implements Match {
-    private int require;
+    private int require;  // 请求体长度
     private final HttpContext context;
     private int len = 0;
 
@@ -42,6 +42,7 @@ public class HttpBodyMatch implements Match {
     }
 
     public void produceData(byte[] content) {
+        // 设置请求体
         context.getRequest().setContent(content);
 
         boolean skip = false;
@@ -58,6 +59,7 @@ public class HttpBodyMatch implements Match {
             }
         }
 
+        // 设置响应体大小
         context.getResponse().addHead("Content-Length", String.valueOf(context.getResponse().getBodyLength()));
         // 生成发送信息
         context.getResponse().write(context.getBos());

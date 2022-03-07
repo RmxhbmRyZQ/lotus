@@ -8,10 +8,6 @@ import java.util.Set;
 public class RequestCookie {
     private final Map<String, String> cookies = new HashMap<>();
 
-    public RequestCookie() {
-
-    }
-
     public RequestCookie(String cookie) {
         if (cookie == null) return;
         String[] split = cookie.split(";");

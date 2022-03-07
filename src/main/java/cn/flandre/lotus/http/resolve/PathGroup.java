@@ -4,6 +4,8 @@ import cn.flandre.lotus.constant.HttpState;
 import cn.flandre.lotus.controller.Controller;
 import cn.flandre.lotus.exception.HttpException;
 import cn.flandre.lotus.http.match.HttpContext;
+import cn.flandre.lotus.middleware.PathMiddleware;
+import cn.flandre.lotus.middleware.Pipeline;
 
 import java.util.LinkedList;
 
@@ -12,6 +14,15 @@ public class PathGroup {
 
     public static void addPath(Path path) {
         paths.add(path);
+    }
+
+    public static void addPath(String path, LinkedList<Pipeline> in, LinkedList<Pipeline> out, Controller controller){
+        paths.add(new Path(path, new PathMiddleware(in, out, controller)));
+    }
+
+    public static void addPath(String path, Pipeline in, Pipeline out, Controller controller){
+        paths.add(new Path(path, new PathMiddleware(new LinkedList<Pipeline>(){{add(in);}},
+                new LinkedList<Pipeline>(){{add(out);}}, controller)));
     }
 
     public static void addPath(String path, Controller controller){
@@ -24,6 +35,6 @@ public class PathGroup {
                 return path.getPathPurification().handle(context, path.getMatcher());
             }
         }
-        throw new HttpException(HttpState.NOT_FOUND, false, false);
+        throw new HttpException(HttpState.NOT_FOUND, false);
     }
 }

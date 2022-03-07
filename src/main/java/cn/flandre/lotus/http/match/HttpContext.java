@@ -1,5 +1,6 @@
 package cn.flandre.lotus.http.match;
 
+import cn.flandre.lotus.database.Database;
 import cn.flandre.lotus.http.web.Request;
 import cn.flandre.lotus.http.web.Response;
 import cn.flandre.lotus.socket.selector.Register;
@@ -12,16 +13,17 @@ import java.nio.channels.SelectionKey;
  * 一个连接中使用的上下文
  */
 public class HttpContext {
-    private Request request;
-    private Response response;
-    private HttpHeaderMatch httpHeaderMatch;
-    private HttpBodyMatch httpBodyMatch;
-    private SelectionKey key;
-    private WriteFinish writeFinish;
-    private final BlockInputStream bis;
-    private final BlockOutputStream bos;
-    private final Register register;
-    private final BlockOutputStream responseBody;
+    private Request request;  // HTTP请求
+    private Response response;  // HTTP响应
+    private HttpHeaderMatch httpHeaderMatch;  // 请求头解析
+    private HttpBodyMatch httpBodyMatch;  // 请求体解析
+    private SelectionKey key;  // SocketChannel
+    private WriteFinish writeFinish;  // 响应写完时的回调
+    private final BlockInputStream bis;  // 输入流
+    private final BlockOutputStream bos;  // 输出流
+    private final Register register;  // 注册器，用来关闭连接
+    private final BlockOutputStream responseBody;  // 响应体
+    private Database database;
 
     public HttpContext(BlockInputStream bis, BlockOutputStream bos, Register register, BlockOutputStream body) {
         this.bis = bis;
@@ -92,5 +94,13 @@ public class HttpContext {
 
     public BlockOutputStream getResponseBody() {
         return responseBody;
+    }
+
+    public void setDatabase(Database database) {
+        this.database = database;
+    }
+
+    public Database getDatabase() {
+        return database;
     }
 }

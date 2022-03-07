@@ -24,8 +24,10 @@ public class HttpHeaderMatch implements Match {
 
     @Override
     public void match(int read, Block block, int offset) {
+        if (len + read > HttpApplication.setting.getMaxHttpHead())  // 请求头太大了
+            throw new HttpException(HttpState.BAD_REQUEST);
+
         HttpBodyMatch match = context.getHttpBodyMatch();
-        // 要是block里面有两个HTTP头怎么办
         int index = indexOf(block.getBytes(), read, offset);
         if (index == -1) {
             len += read;
@@ -41,14 +43,17 @@ public class HttpHeaderMatch implements Match {
             String contentLength = request.getHeader("Content-Length");
             int length = contentLength != null ? Integer.parseInt(contentLength) : 0;
 
+            // 只有 POST 和 PUT 才会带有请求体
             if (length != 0 && request.getMethod() != RequestMethod.POST && request.getMethod() != RequestMethod.PUT) {
-                throw new HttpException(HttpState.BAD_REQUEST, false);
+                throw new HttpException(HttpState.BAD_REQUEST);
             }
 
+            // 请求体太大了
             if (length >= HttpApplication.setting.getMaxContent()) {
-                throw new HttpException(HttpState.REQUEST_ENTITY_TOO_LARGE, false);
+                throw new HttpException(HttpState.REQUEST_ENTITY_TOO_LARGE);
             }
 
+            // 更改匹配为请求体匹配
             match.setRequire(length);
             match.match(read - index, block, offset + index);
             context.getBis().setMatch(match);
@@ -117,7 +122,7 @@ public class HttpHeaderMatch implements Match {
         context.getBis().read(skip);
         String httpHeader = new String(bytes);
         if (httpHeader.length() > HttpApplication.setting.getMaxHttpHead()) {
-            throw new HttpException(HttpState.REQUEST_URI_TOO_LONG, false);
+            throw new HttpException(HttpState.REQUEST_URI_TOO_LONG);
         }
 
         Request request = new Request(httpHeader);

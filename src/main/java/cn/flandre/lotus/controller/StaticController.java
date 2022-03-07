@@ -10,9 +10,15 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.regex.Matcher;
 
+/**
+ * 静态文件控制器
+ */
 public class StaticController extends BaseController {
     private final String base;
 
+    /**
+     * @param base 静态文件存放的路径，相对于project文件路径来说
+     */
     public StaticController(String base) {
         this.base = base;
     }
@@ -26,7 +32,7 @@ public class StaticController extends BaseController {
         Response response = context.getResponse();
         String path = matcher.group(1);
         if (path.contains("./")) {
-            throw new HttpException(HttpState.BAD_REQUEST, false, false);
+            throw new HttpException(HttpState.BAD_REQUEST, false);
         }
         path = "." + File.separator + base + File.separator + path;
 
@@ -41,7 +47,7 @@ public class StaticController extends BaseController {
             response.setFileBody(path);
             response.addHead("Content-Type", ContentType.getContentType(suffix));
         } catch (FileNotFoundException e) {
-            throw new HttpException(HttpState.NOT_FOUND, false, false);
+            throw new HttpException(HttpState.NOT_FOUND, false);
         }
     }
 }

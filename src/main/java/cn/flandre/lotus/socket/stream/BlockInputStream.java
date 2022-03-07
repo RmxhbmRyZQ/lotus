@@ -38,6 +38,7 @@ public class BlockInputStream extends InputStream {
             }
             len += r;
             buffer.incLimit(r);
+            // 对读取的数据进行检查
             match.match(r, buffer, off);
             if (buffer.isFull()) {  // 如果写满取空的出来
                 buffer = freeBlock.poll();

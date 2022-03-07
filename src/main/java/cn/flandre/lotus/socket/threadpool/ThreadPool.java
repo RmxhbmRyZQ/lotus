@@ -28,7 +28,7 @@ public class ThreadPool implements Postman {
     }
 
     private void initHandler() {
-        handler = new Handler(message -> {
+        handler = new Handler(message -> {  // 消息处理函数
             switch (message.what) {
                 case IOConstant.DISTRIBUTE_SOCKET:  // 分配socket到合适的线程
                     distributeSocket((SocketChannel) message.obj);
@@ -62,8 +62,9 @@ public class ThreadPool implements Postman {
             }
             worker = workers[id];
         }
+        // 分发 SocketChannel
         taskNumber[worker.id()]++;
-        Client client = new Client(obj, worker.getLoop(), worker.getFreeBlock());
+        Client client = new Client(obj, worker.getLoop(), worker);
         if (!worker.register(new RegisterItem(obj, SelectionKey.OP_READ, client))) {
             handler.sendMessage(Message.obtain(IOConstant.CLOSE_SOCKET, worker.id()));
         }

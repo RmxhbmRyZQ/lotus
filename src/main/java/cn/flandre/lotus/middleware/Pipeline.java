@@ -30,12 +30,7 @@ public interface Pipeline {
             case DELETE:
                 return delete(context, matcher);
             default:
-                throwHttpError(HttpState.BAD_REQUEST, false);
-                return true;
+                throw new HttpException(HttpState.METHOD_NOT_ALLOWED, false);
         }
-    }
-
-    public default void throwHttpError(int status, boolean i){
-        throw new HttpException(status, i);
     }
 }

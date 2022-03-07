@@ -1,18 +1,21 @@
 package cn.flandre.lotus.exception;
 
-public class HttpException extends RuntimeException{
-    private final int status;
-    private final boolean immediately;
-    private String body;
-    private boolean close = true;
+public class HttpException extends RuntimeException {
+    private boolean immediately = false;  // 是否立即关闭socket
+    private int status;  // 响应码
+    private String body;  // 响应体
+    private boolean close = true;  // 发送错误后是否关闭socket
 
-    public HttpException(int status, boolean immediately) {
-        this.status = status;
-        this.immediately = immediately;
+    public HttpException() {
+        immediately = true;
     }
 
-    public HttpException(int status, boolean immediately, boolean close){
-        this(status, immediately);
+    public HttpException(int status) {
+        this.status = status;
+    }
+
+    public HttpException(int status, boolean close) {
+        this(status);
         this.close = close;
     }
 

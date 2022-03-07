@@ -6,6 +6,7 @@ import cn.flandre.lotus.exception.ResponseBodyAlreadySetException;
 import cn.flandre.lotus.socket.stream.BlockOutputStream;
 
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.StandardCharsets;
@@ -48,25 +49,6 @@ public class ResponseBody {
             this.body.write(body);
             response.removeHead("Content-Encoding");
         }
-//        Setting setting = HttpApplication.setting;
-//        if (!encrypt || body.length < setting.getMinEncryptLength() || body.length > setting.getMaxEncryptLength()) {
-//            this.body.write(body);
-//            return;
-//        }
-//
-//        switch (setting.getContentEncrypt()) {
-//            case "gzip":
-//                try {
-//                    writeGZIP(body);
-//                    break;
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            case "identity":
-//            default:
-//                this.body.write(body);
-//                break;
-//        }
     }
 
     public void finish(OutputStream os) throws IOException {
@@ -117,7 +99,7 @@ public class ResponseBody {
             return;
         }
 
-        byte[] bytes = new byte[(int) file.length()];
+        byte[] bytes = new byte[(int) length];
         FileInputStream fis = new FileInputStream(file);
         try {
             fis.read(bytes);
@@ -137,30 +119,6 @@ public class ResponseBody {
             body.write(bytes);
             response.removeHead("Content-Encoding");
         }
-//        Setting setting = HttpApplication.setting;
-//        if (!encrypt || length > setting.getMaxEncryptLength() || length < setting.getMinEncryptLength()) {
-//            fileBody = file;
-//            fileLength = length;
-//            return;
-//        }
-//
-//        switch (setting.getContentEncrypt()) {
-//            case "gzip":
-//                try {
-//                    byte[] bytes = new byte[(int) file.length()];
-//                    FileInputStream fis = new FileInputStream(file);
-//                    fis.read(bytes);
-//                    writeGZIP(bytes);
-//                    break;
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            case "identity":
-//            default:
-//                fileBody = file;
-//                fileLength = length;
-//                break;
-//        }
     }
 
     public boolean shouldTransferTo() {

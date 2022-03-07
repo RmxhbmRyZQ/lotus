@@ -9,7 +9,7 @@ import java.util.Set;
 public class IOLoop implements Register {
     private final Selector selector;
     private final LinkedList<RegisterItem> registerItems = new LinkedList<>();
-    private OnClose close;
+    private OnClose close;  // socket关闭时的回调函数
     private volatile boolean sleep = false;
 
     public IOLoop(OnClose close) throws IOException {
@@ -25,7 +25,7 @@ public class IOLoop implements Register {
         synchronized (this) {
             registerItems.add(register);
         }
-        // 使用 while 是为了防止 wakeup 在 sleep 和 select 之间调用，从而形成死锁
+        // 防止 wakeup 在 sleep 和 select 之间调用，从而形成死锁
         while (sleep)
             selector.wakeup();
     }

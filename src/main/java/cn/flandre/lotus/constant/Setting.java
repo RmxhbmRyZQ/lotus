@@ -20,6 +20,12 @@ public abstract class Setting {
         setting.put("contentEncrypt", "identity");
         setting.put("minEncryptLength", 2 * 1024);
         setting.put("maxEncryptLength", 10 * 1024 * 1024);
+        setting.put("useDatabase", false);
+        // 如果useDatabase为true时，下面四个一定要定义
+        setting.put("databaseDriver", "");
+        setting.put("databaseUri", "");
+        setting.put("databaseUsername", "");
+        setting.put("databasePassword", "");
     }
 
     public Setting(String filename) throws JSONException, IOException {
@@ -71,5 +77,37 @@ public abstract class Setting {
 
     public int getMinEncryptLength() {
         return setting.getInt("minEncryptLength");
+    }
+
+    public String getDatabaseDriver() {
+        return setting.getString("databaseDriver");
+    }
+
+    public boolean getUseDataBase() {
+        return setting.getBoolean("useDatabase");
+    }
+
+    public Object get(String key) {
+        return setting.get(key);
+    }
+
+    public int getInt(String key) {
+        return setting.getInt(key);
+    }
+
+    public String getString(String key) {
+        return setting.getString(key);
+    }
+
+    public double getDouble(String key) {
+        return setting.getDouble(key);
+    }
+
+    public boolean getBoolean(String key) {
+        return setting.getBoolean(key);
+    }
+
+    public long getLong(String key) {
+        return setting.getLong(key);
     }
 }
