@@ -17,4 +17,8 @@ public class HttpApplication {
             ioException.printStackTrace();
         }
     }
+
+    public static void main(String[] args) {
+        run(new Setting());
+    }
 }

@@ -65,7 +65,7 @@ public class HttpHeaderMatch implements Match {
         Setting setting = HttpApplication.setting;
         response.addHead("Server", "lotus");
         response.addHead("Connection", setting.isKeepAlive() ? "keep-alive" : "close");
-        response.addHead("Date", new Date().toString());
+        response.addHead("Date", new Date().toGMTString());
         response.addHead("Content-Type", setting.getContentType());
         response.addHead("X-Powered-By", "Java/1.8");
         return response;

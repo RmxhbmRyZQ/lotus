@@ -45,9 +45,7 @@ public class DatabaseSession implements Session {
         }
         this.database = database;
         nullId = id == null;
-        if (nullId) {
-            id = String.valueOf(UUID.randomUUID());
-        }
+
         if (!nullId) {
             ResultSet query;
             try {
@@ -68,6 +66,11 @@ public class DatabaseSession implements Session {
                 nullId = true;
             }
         }
+
+        if (nullId) {
+            id = String.valueOf(UUID.randomUUID());
+        }
+
         this.id = id;
     }
 
@@ -83,7 +86,7 @@ public class DatabaseSession implements Session {
 
     @Override
     public boolean updateAttribute() {
-        expireTime = System.currentTimeMillis() + 24 * 60 * 60 * 1000;
+        expireTime = System.currentTimeMillis() + HttpApplication.setting.getSessionExpireTime();
         String data = produceData();
         try {
             if (nullId) {

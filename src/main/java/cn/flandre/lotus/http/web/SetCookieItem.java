@@ -44,7 +44,7 @@ public class SetCookieItem {
 
         builder.append(key).append("=").append(value);
         if (expires != null)
-            builder.append("; expires=").append(expires);
+            builder.append("; expires=").append(expires.toGMTString());
         if (domain != null)
             builder.append("; domain=").append(domain);
         if (path != null)

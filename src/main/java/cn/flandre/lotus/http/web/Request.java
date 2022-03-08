@@ -5,6 +5,7 @@ import cn.flandre.lotus.exception.HttpException;
 import cn.flandre.lotus.constant.HttpState;
 import cn.flandre.lotus.http.match.HttpContext;
 import cn.flandre.lotus.http.session.DatabaseSession;
+import cn.flandre.lotus.http.session.MemorySession;
 import cn.flandre.lotus.http.session.Session;
 
 import java.nio.charset.StandardCharsets;
@@ -257,12 +258,12 @@ public class Request {
             Request request = context.getRequest();
             switch (HttpApplication.setting.getSessionStore()) {
                 case "cache":
+                    session = MemorySession.getSession(request.getCookie("SessionID"));
+                    session.refresh();
                     break;
                 case "database":
                     session = new DatabaseSession(context.getDatabase(), request.getCookie("SessionID"));
                     session.refresh();
-                    break;
-                case "file":
                     break;
             }
         }

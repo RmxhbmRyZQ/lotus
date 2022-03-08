@@ -24,27 +24,45 @@ public class Response {
         this.body = new ResponseBody(this, body);
     }
 
+    /**
+     * 添加响应头
+     */
     public void addHead(String key, String value) {
         headers.put(key, value);
     }
 
+    /**
+     * 删除响应头
+     */
     public void removeHead(String key) {
         headers.remove(key);
     }
 
+    /**
+     * 获取响应头
+     */
     public String getHead(String key) {
         String head = headers.get(key);
         return head != null ? head : "";
     }
 
+    /**
+     * 设置cookie
+     */
     public void setCookie(SetCookieItem item) {
         cookies.addCookie(item);
     }
 
+    /**
+     * 删除cookie
+     */
     public void removeCookie(SetCookieItem item) {
         cookies.removeCookie(item);
     }
 
+    /**
+     * 设置状态码以及对应的响应体
+     */
     public void setStatusWithBody(int status) {
         setStatus(status);
         String builder = "<h1>" + status + "</h1>" +
@@ -52,6 +70,9 @@ public class Response {
         setBody(builder);
     }
 
+    /**
+     * 设置状态码
+     */
     public void setStatus(int status) {
         if (HttpState.isAvailableStatus(status))
             this.status = status;
@@ -95,18 +116,27 @@ public class Response {
         return body.transfer(channel);
     }
 
+    /**
+     * 设置json类型的响应体
+     */
     public void setJsonBody(String jsonBody){
         setBody(jsonBody);
         headers.put("Content-Type", ContentType.getContentType(".json"));
     }
 
-    public void setTextBody(String jsonBody){
-        setBody(jsonBody);
+    /**
+     * 设置文件类型的响应体
+     */
+    public void setTextBody(String textBody){
+        setBody(textBody);
         headers.put("Content-Type", ContentType.getContentType(".txt"));
     }
 
-    public void setHtmlBody(String jsonBody){
-        setBody(jsonBody);
+    /**
+     * 设置html类型的响应体
+     */
+    public void setHtmlBody(String htmlBody){
+        setBody(htmlBody);
         headers.put("Content-Type", ContentType.getContentType(".html"));
     }
 
@@ -114,10 +144,16 @@ public class Response {
         this.body.setBody(body);
     }
 
+    /**
+     * 设置响应体
+     */
     public void setBody(String body) {
         this.body.setBody(body.getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * 设置文件为响应体
+     */
     public void setFileBody(File file) throws FileNotFoundException {
         this.body.setFileBody(file);
     }

@@ -1,5 +1,6 @@
 package cn.flandre.lotus.controller;
 
+import cn.flandre.lotus.HttpApplication;
 import cn.flandre.lotus.constant.ContentType;
 import cn.flandre.lotus.exception.HttpException;
 import cn.flandre.lotus.constant.HttpState;
@@ -23,7 +24,7 @@ public class StaticController extends BaseController {
         this.base = base;
     }
 
-    public StaticController(){
+    public StaticController() {
         this("");
     }
 
@@ -34,7 +35,8 @@ public class StaticController extends BaseController {
         if (path.contains("./")) {
             throw new HttpException(HttpState.BAD_REQUEST, false);
         }
-        path = "." + File.separator + base + File.separator + path;
+
+        path = HttpApplication.setting.getDefaultResourcePath() + base + "/" + path;
 
         String suffix;
         int find = path.lastIndexOf('.');
