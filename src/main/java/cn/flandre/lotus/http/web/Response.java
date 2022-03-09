@@ -158,8 +158,12 @@ public class Response {
         this.body.setFileBody(file);
     }
 
+    /**
+     * 设置文件为响应体
+     * @param file 相对于setting.defaultResourcePath的路径
+     */
     public void setFileBody(String file) throws FileNotFoundException {
-        this.body.setFileBody(new File(file));
+        this.body.setFileBody(new File(HttpApplication.setting.getDefaultResourcePath() + file));
     }
 
     public void setEncrypt(String header) {

@@ -25,6 +25,17 @@ public class BlockOutputStream extends OutputStream {
     }
 
     public boolean writeFully() throws IOException {
+        if (queue.getFirst().isEmpty()) {
+            try {
+                os.flush();
+                if (writeFinish != null)  // 写完成，回调
+                    writeFinish.writeFinish();
+                return true;
+            } catch (SystemBufferOverflowException e) {
+                return false;
+            }
+        }
+
         int w;
         while (true) {
             Block block = queue.poll();  // 从写入队列取出块来写
@@ -37,14 +48,14 @@ public class BlockOutputStream extends OutputStream {
                 else {
                     block.reset();
                     queue.add(block);
-                }
-                try {
-                    os.flush();
-                    if (writeFinish != null)  // 写完成，回调
-                        writeFinish.writeFinish();
-                    return true;
-                } catch (SystemBufferOverflowException e) {
-                    return false;
+                    try {
+                        os.flush();
+                        if (writeFinish != null)  // 写完成，回调
+                            writeFinish.writeFinish();
+                        return true;
+                    } catch (SystemBufferOverflowException e) {
+                        return false;
+                    }
                 }
             } else {
                 queue.addFirst(block);
@@ -96,7 +107,7 @@ public class BlockOutputStream extends OutputStream {
         return !queue.getFirst().isEmpty();
     }
 
-    public long size(){
+    public long size() {
         return len;
     }
 }

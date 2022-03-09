@@ -11,7 +11,7 @@ public class MemorySession implements Session {
     private static final Object lock2 = new Object();
 
     public static Session getSession(String id) {
-        System.out.println(id);
+//        System.out.println(id);
         MemorySession session = null;
         if (id != null) {
             synchronized (lock1) {
@@ -50,6 +50,11 @@ public class MemorySession implements Session {
     @Override
     public void setAttribute(String key, String value) {
         kv.put(key, value);
+    }
+
+    @Override
+    public void removeAttribute(String key) {
+        sessions.remove(key);
     }
 
     @Override

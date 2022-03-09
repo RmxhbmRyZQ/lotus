@@ -1,5 +1,6 @@
 package cn.flandre.lotus.controller;
 
+import cn.flandre.lotus.HttpApplication;
 import cn.flandre.lotus.exception.HttpException;
 import cn.flandre.lotus.constant.HttpState;
 import cn.flandre.lotus.http.match.HttpContext;
@@ -46,8 +47,8 @@ public class BaseController implements Controller {
     /**
      * 页面跳转
      *
-     * @param context 上下文
-     * @param path 跳转的路径
+     * @param context   上下文
+     * @param path      跳转的路径
      * @param permanent true 301, false 302
      */
     protected void redirect(HttpContext context, String path, boolean permanent) {
@@ -59,13 +60,18 @@ public class BaseController implements Controller {
     /**
      * 模板渲染，使用freemarker
      *
-     * @param path 模板路径
+     * @param path     模板路径，相对于Setting.defaultResourcePath
      * @param filename 模板名称
-     * @param model 数据模型
-     * @param context 上下文
+     * @param model    数据模型
+     * @param context  上下文
      */
-    protected void render(String path, String filename, Map<Object, Object> model, HttpContext context) {
+    protected void render(String path, String filename, Map<String, Object> model, HttpContext context) {
         try {
+            if (path.equals("")){
+                path = HttpApplication.setting.getDefaultResourcePath();
+            }else {
+                path = HttpApplication.setting.getDefaultResourcePath() + path;
+            }
             Template template = getFreeMarkerCFG(path).getTemplate(filename);
             OutputStream os = context.getResponse().getOS(path, filename);
             Writer out = new OutputStreamWriter(os, StandardCharsets.UTF_8);
@@ -76,18 +82,22 @@ public class BaseController implements Controller {
         }
     }
 
-    private Configuration configuration = null;
+    private volatile Configuration configuration = null;
 
     protected Configuration getFreeMarkerCFG(String sTemplateFilePath) {
         if (null == configuration) {
-            configuration = new Configuration(Configuration.getVersion());
-            configuration.setEncoding(Locale.CHINA, "UTF-8");
+            synchronized (this) {
+                if (null == configuration) {
+                    configuration = new Configuration(Configuration.getVersion());
+                    configuration.setEncoding(Locale.CHINA, "UTF-8");
 
-            // configuration.setClassForTemplateLoading(this.getClass(), "/");  // 根据类的路径加载
-            try {
-                configuration.setDirectoryForTemplateLoading(new File(sTemplateFilePath));
-            } catch (Exception e) {
-                e.printStackTrace();
+                    // configuration.setClassForTemplateLoading(this.getClass(), "/");  // 根据类的路径加载
+                    try {
+                        configuration.setDirectoryForTemplateLoading(new File(sTemplateFilePath));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         }
         return configuration;

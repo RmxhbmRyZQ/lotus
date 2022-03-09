@@ -8,10 +8,13 @@ public interface Session {
 
     /**
      * 设置session的一个属性
-     * @param key
-     * @param value
      */
     public void setAttribute(String key, String value);
+
+    /**
+     * 删除session的一个属性
+     */
+    public void removeAttribute(String key);
 
     /**
      * 更新session的属性值

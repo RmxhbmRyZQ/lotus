@@ -85,6 +85,11 @@ public class DatabaseSession implements Session {
     }
 
     @Override
+    public void removeAttribute(String key) {
+        sessions.remove(key);
+    }
+
+    @Override
     public boolean updateAttribute() {
         expireTime = System.currentTimeMillis() + HttpApplication.setting.getSessionExpireTime();
         String data = produceData();

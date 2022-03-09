@@ -273,7 +273,7 @@ public class Request {
     public void releaseSession(Response response) {
         if (session == null) return;
         session.updateAttribute();
-        response.setCookie(new SetCookieItem("SessionID",
-                session.getID(), new Date(session.getExpireTime())));
+        response.setCookie(new SetCookieItem("SessionID", session.getID(),
+                new Date(session.getExpireTime()), null, "/", false, false));
     }
 }

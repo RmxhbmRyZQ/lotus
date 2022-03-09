@@ -38,11 +38,11 @@ public class ServerSetting extends Setting {
 ```json
 // 配置文件直接使用JSON格式
 {
-  "databaseUri": "jdbc:mysql://localhost:3306/pblog?serverTimezone=CTT&useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=true",
+  "databaseUri": "jdbc:mysql://localhost:3306/pblog?serverTimezone=GMT&useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=true",
   "databaseUsername": "root",
   "databasePassword": "",
   "useDatabase": true,
-  "databaseDriver": "com.mysql.jdbc.Driver",
+  "databaseDriver": "com.mysql.cj.jdbc.Driver",
   "useSession": true,
   "sessionStore": "cache"
 }
@@ -105,7 +105,7 @@ public class BaseController implements Controller {
     /**
      * 模板渲染，使用freemarker
      *
-     * @param path 模板路径
+     * @param path 模板路径，相对于Setting.defaultResourcePath
      * @param filename 模板名称
      * @param model 数据模型
      * @param context 上下文
@@ -175,6 +175,25 @@ public class Response {
 }
 ```
 
+## 文件上传
+
+```java
+public class IndexController extends BaseController {
+    @Override
+    public void post(HttpContext context, Matcher matcher) {
+        MultipartData name = context.getRequest().getFileBody("name");
+        try {
+            name.upload("/upload");  // 保存文件，使用默认文件名
+            name.upload("/upload"， "www.jpg");  // 保存文件(或者)
+            name.upload(new File("./src/main/resources/upload"));  // 或者
+            name.upload(new File("./src/main/resources/upload", "www.jpg"));  // 或者
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+}
+```
+
 ## 模板
 
 模板使用的是 freemarker，有关他的介绍为：http://freemarker.foofun.cn/
@@ -200,16 +219,16 @@ public class IndexController extends BaseController {
     public void get(HttpContext context, Matcher matcher) {
         Map<Object, Object> map = new HashMap<>();
         map.put("name", "john");
-        render("./template", "index.html", map, context);
+        render("/template", "index.html", map, context);  // /template 是相对于配置文件的默认路径的
     }
 }
 ```
 
 # 中间件
 
-中间件是在controller处理前或处理后进行的回调，我认为用来处理拦截器，或者SQL请求等生成数据的事情
+中间件是在 controller 处理前或处理后进行的回调，我认为用来处理拦截器，或者 SQL 请求等生成数据的事情
 
-中间件分为：全局中间件，单路径中间件；全局中间件是任何请求都会调用，而单路径中间件只会在对应的路径被请才去才会调用
+中间件分为：全局中间件，单路径中间件；全局中间件是任何请求都会调用，而单路径中间件只会在对应的路径被请求才会调用
 
 ```java
 // 如果要写中间件的话，需要继承这个类，需要处理什么方法就重写什么函数
@@ -428,7 +447,7 @@ public class CsrfController extends BaseController {
         
         Map<Object, Object> model = new HashMap<>();
         model.put("csrftoken", token);
-        render(HttpApplication.setting.getDefaultResourcePath() + "/html", "csrf.html", model, context);
+        render("/html", "csrf.html", model, context);
     }
 
     @Override

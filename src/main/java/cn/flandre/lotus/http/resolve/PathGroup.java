@@ -16,16 +16,25 @@ public class PathGroup {
         paths.add(path);
     }
 
-    public static void addPath(String path, LinkedList<Pipeline> in, LinkedList<Pipeline> out, Controller controller){
+    public static void addPath(String path, LinkedList<Pipeline> in, LinkedList<Pipeline> out, Controller controller) {
         paths.add(new Path(path, new PathMiddlewareBean(in, out, controller)));
     }
 
-    public static void addPath(String path, Pipeline in, Pipeline out, Controller controller){
-        paths.add(new Path(path, new PathMiddlewareBean(new LinkedList<Pipeline>(){{add(in);}},
-                new LinkedList<Pipeline>(){{add(out);}}, controller)));
+    public static void addPath(String path, Pipeline in, Pipeline out, Controller controller) {
+        LinkedList<Pipeline> ins = null;
+        LinkedList<Pipeline> outs = null;
+        if (in != null) {
+            ins = new LinkedList<>();
+            ins.add(in);
+        }
+        if (out != null) {
+            outs = new LinkedList<>();
+            outs.add(in);
+        }
+        paths.add(new Path(path, new PathMiddlewareBean(ins, outs, controller)));
     }
 
-    public static void addPath(String path, Controller controller){
+    public static void addPath(String path, Controller controller) {
         paths.add(new Path(path, controller));
     }
 

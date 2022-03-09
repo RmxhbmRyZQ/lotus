@@ -32,6 +32,11 @@ public class StaticController extends BaseController {
     public void get(HttpContext context, Matcher matcher) {
         Response response = context.getResponse();
         String path = matcher.group(1);
+
+        if (path == null) {
+            throw new HttpException(HttpState.NOT_FOUND);
+        }
+
         if (path.contains("./")) {
             throw new HttpException(HttpState.BAD_REQUEST, false);
         }
@@ -46,9 +51,11 @@ public class StaticController extends BaseController {
             suffix = path.substring(find);
 
         try {
-            response.setFileBody(path);
+            response.setFileBody(new File(path));
             response.addHead("Content-Type", ContentType.getContentType(suffix));
         } catch (FileNotFoundException e) {
+            System.out.println(path);
+//            e.printStackTrace();
             throw new HttpException(HttpState.NOT_FOUND, false);
         }
     }
