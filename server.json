@@ -6,5 +6,5 @@
   "databaseDriver": "com.mysql.cj.jdbc.Driver",
   "useSession": true,
   "sessionStore": "database",
-  "port": 8080
+  "port": 80
 }
