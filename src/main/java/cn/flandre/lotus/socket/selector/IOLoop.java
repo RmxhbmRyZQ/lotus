@@ -92,6 +92,10 @@ public class IOLoop implements Register {
 //            e.printStackTrace();
             select.onError(key, e);
             cancel(key.channel());
+        }catch (Exception e){
+            e.printStackTrace();
+            select.onError(key, e);
+            cancel(key.channel());
         }
     }
 

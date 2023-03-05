@@ -22,7 +22,7 @@ public class ServerSetting extends Setting {
     }
 
     public static void main(String[] args) throws IOException {
-        HttpApplication.run(new ServerSetting("./server.json"));
+        HttpApplication.run(new ServerSetting("./setting/server.json"));
     }
 
     @Override

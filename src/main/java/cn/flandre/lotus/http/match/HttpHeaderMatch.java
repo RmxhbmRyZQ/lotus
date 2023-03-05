@@ -9,6 +9,7 @@ import cn.flandre.lotus.http.web.Request;
 import cn.flandre.lotus.http.web.RequestMethod;
 import cn.flandre.lotus.http.web.Response;
 import cn.flandre.lotus.socket.stream.Block;
+import com.sun.istack.internal.Nullable;
 
 import java.util.Date;
 
@@ -24,8 +25,9 @@ public class HttpHeaderMatch implements Match {
 
     @Override
     public void match(int read, Block block, int offset) {
-        if (len + read > HttpApplication.setting.getMaxHttpHead())  // 请求头太大了
+        if (len + read > HttpApplication.setting.getMaxHttpHead()) {  // 请求头太大了
             throw new HttpException(HttpState.BAD_REQUEST);
+        }
 
         HttpBodyMatch match = context.getHttpBodyMatch();
         int index = indexOf(block.getBytes(), read, offset);
@@ -34,6 +36,7 @@ public class HttpHeaderMatch implements Match {
         } else {
             len += index;
             Request request = resolveRequest();
+            System.out.println(request.getMethod() + " " + request.getPath());
             Response response = getResponse(request);
 
             context.setRequest(request);
@@ -60,7 +63,7 @@ public class HttpHeaderMatch implements Match {
         }
     }
 
-    private Response getResponse(Request request) {
+    private Response getResponse(@Nullable Request request) {
         Response response = new Response(context.getResponseBody());
         Setting setting = HttpApplication.setting;
         response.addHead("Server", "lotus");

@@ -1,7 +1,9 @@
 package cn.flandre.lotus.http.session;
 
 import cn.flandre.lotus.HttpApplication;
+import cn.flandre.lotus.constant.HttpState;
 import cn.flandre.lotus.database.Database;
+import cn.flandre.lotus.exception.HttpException;
 import cn.flandre.lotus.exception.UnsupportedDatabaseException;
 
 import java.sql.ResultSet;

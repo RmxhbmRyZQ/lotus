@@ -5,6 +5,6 @@
   "useDatabase": true,
   "databaseDriver": "com.mysql.cj.jdbc.Driver",
   "useSession": true,
-  "sessionStore": "database",
+  "sessionStore": "cache",
   "port": 80
 }
