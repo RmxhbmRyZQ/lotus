@@ -60,17 +60,17 @@ public class WriteFinish {
         HttpHeaderMatch match = context.getHttpHeaderMatch();
         String connection;
         if ((connection = context.getRequest().getHeader("Connection")) == null ||
-                !connection.equalsIgnoreCase("keep-live")) {
+                !connection.equalsIgnoreCase("keep-alive")) {
             register.cancel(key.channel());
             return;
         }
+        context.getBis().setMatch(match);
 
         if (read == 0) {
             key.interestOps(SelectionKey.OP_READ);
             return;
         }
         // 如果缓存有下一个请求头信息，则进行处理
-        context.getBis().setMatch(match);
         match.match(read, block, offset);
         if (!context.getBos().available())
             key.interestOps(SelectionKey.OP_READ);

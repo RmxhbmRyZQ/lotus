@@ -8,6 +8,7 @@ import cn.flandre.lotus.middleware.PathMiddlewareBean;
 import cn.flandre.lotus.middleware.Pipeline;
 
 import java.util.LinkedList;
+import java.util.regex.Matcher;
 
 public class PathGroup {
     private static final LinkedList<Path> paths = new LinkedList<>();
@@ -40,8 +41,9 @@ public class PathGroup {
 
     public static boolean match(String uri, HttpContext context) {
         for (Path path : paths) {
-            if (path.match(uri)) {
-                return path.getPathPurification().handle(context, path.getMatcher());
+            Matcher matcher = path.getPattern().matcher(uri);
+            if (matcher.find()) {
+                return path.getPathPurification().handle(context, matcher);
             }
         }
         throw new HttpException(HttpState.NOT_FOUND, false);

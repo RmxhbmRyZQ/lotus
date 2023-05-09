@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
 public class Path {
     private final Pattern pattern;
     private final PathMiddlewareBean pathMiddlewareBean;
-    private Matcher matcher;
 
     public Path(Pattern pattern, PathMiddlewareBean pathMiddlewareBean) {
         this.pattern = pattern;
@@ -31,13 +30,8 @@ public class Path {
         this.pathMiddlewareBean = pathMiddlewareBean;
     }
 
-    public boolean match(String uri) {
-        matcher = pattern.matcher(uri);
-        return matcher.find();
-    }
-
-    public Matcher getMatcher() {
-        return matcher;
+    public Pattern getPattern() {
+        return pattern;
     }
 
     public PathMiddlewareBean getPathPurification() {

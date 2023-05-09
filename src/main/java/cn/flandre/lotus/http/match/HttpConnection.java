@@ -46,20 +46,27 @@ public class HttpConnection extends AbstractTCPDataHandler {
     @Override
     public void readData(SelectionKey key) throws IOException {
         context.setKey(key);
-        try {
+        attempt(() -> {
             if (bis.readFully() == -1) {
                 register.cancel(sc);
             }
+        }, key);
+    }
+
+    @Override
+    public void writeData(SelectionKey key) throws IOException {
+        attempt(bos::writeFully, key);
+    }
+
+    private void attempt(Attempt attempt, SelectionKey key) throws IOException {
+        try {
+            attempt.attempt();
         } catch (HttpException e) {
             if (e.isImmediately()) {  // 立即关闭连接
                 register.cancel(sc);
                 return;
             }
-            Response response = context.getResponse();
-            if (response == null) {
-                response = new Response(context.getResponseBody());
-                context.setResponse(response);
-            }
+            Response response = getResponse(context);
             // 设置错误信息
             if (e.getBody() != null) {
                 response.setStatus(e.getStatus());
@@ -74,11 +81,7 @@ public class HttpConnection extends AbstractTCPDataHandler {
             throw e;
         } catch (Exception e) {
             e.printStackTrace();
-            Response response = context.getResponse();
-            if(response == null) {
-                response = new Response(context.getResponseBody());
-                context.setResponse(response);
-            }
+            Response response = getResponse(context);
             response.setStatusWithBody(HttpState.INTERNAL_SERVER_ERROR);
             response.write(bos);
             key.interestOps(SelectionKey.OP_WRITE);
@@ -86,8 +89,16 @@ public class HttpConnection extends AbstractTCPDataHandler {
         }
     }
 
-    @Override
-    public void writeData(SelectionKey key) throws IOException {
-        bos.writeFully();
+    private Response getResponse(HttpContext context){
+        Response response = context.getResponse();
+        if (response == null) {
+            response = new Response(context.getResponseBody());
+            context.setResponse(response);
+        }
+        return response;
+    }
+
+    interface Attempt{
+        void attempt() throws IOException;
     }
 }

@@ -175,6 +175,13 @@ public class Response {
 
 ## 文件上传
 
+```html
+<form action="/file/" method="post" enctype="multipart/form-data">
+<input type="file" name="name">
+<input type="submit" value="上传文件">
+</form>
+```
+
 ```java
 public class IndexController extends BaseController {
     @Override

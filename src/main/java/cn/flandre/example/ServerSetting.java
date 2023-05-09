@@ -41,7 +41,7 @@ public class ServerSetting extends Setting {
         PathGroup.addPath("^(.*?)$", new BaseController(){
             @Override
             public void get(HttpContext context, Matcher matcher) {
-                redirect(context, "/admin/index/", true);
+                redirect(context, "/admin/index/", false);
             }
         });
     }

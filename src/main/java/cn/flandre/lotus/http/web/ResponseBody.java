@@ -31,8 +31,10 @@ public class ResponseBody {
     }
 
     public void setBody(byte[] body) {
-        if (fileBody != null)
-            throw new ResponseBodyAlreadySetException("Cannot set body, when the filebody have been set");
+        // fileBody不为空但是又出错时会出现问题
+        // body的输出优先级高于filebody
+//        if (fileBody != null)
+//            throw new ResponseBodyAlreadySetException("Cannot set body, when the filebody have been set");
         OutputStream os = getOS(body.length);
         try {
             os.write(body);

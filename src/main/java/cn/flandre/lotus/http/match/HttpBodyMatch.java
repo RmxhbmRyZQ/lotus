@@ -23,8 +23,8 @@ public class HttpBodyMatch implements Match {
     @Override
     public void match(int read, Block block, int offset) {
         byte[] bytes = null;
+        len += read;
         if (require != 0) {
-            len += read;
             if (len >= require) {
                 bytes = new byte[require];
                 context.getBis().read(bytes);
